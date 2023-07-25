@@ -6,7 +6,6 @@ import 'react-pdf/dist/esm/Page/TextLayer.css';
 
 
 import React from 'react'
-import PropTypes from 'prop-types'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
@@ -54,11 +53,11 @@ function Viewer(props) {
   /* This is the final scale used for the PDF viewer */
   const [zoom, setZoom] = useState(1);
 
-  const [_width, setWidth] = useState();
-  const [_height, setHeight] = useState();
+  let _initialWidth, _initialHeight;
 
   const pageRefs = {}
   let documentRef = null;
+  let canvasRef = React.useRef();
   let rescaledRef = React.useRef();
 
   function onDocumentLoadSuccess({ numPages }) {
@@ -85,17 +84,23 @@ function Viewer(props) {
 
         // Those don't need to be in a state. directly add them to ref.current.styles.transform = scale(...)
         const currentScale = rescaledRef.current.style.transform.slice(6, rescaledRef.current.style.transform.length - 1)
-        rescaledRef.current.style.transform = `scale(${parseFloat(currentScale) + (detectMouseWheelDirection(e) === 'up' ? 0.1 : -0.1)})`
+        const nextScale = parseFloat(currentScale) + (detectMouseWheelDirection(e) === 'up' ? 0.1 : -0.1);
+        rescaledRef.current.style.transform = `scale(${nextScale})`
 
-          const { scrollHeight: scrollHeight2, scrollWidth: scrollWidth2 } = area;
-  
-          const widthDiff = scrollWidth2 - scrollWidth
-          const heightDiff = scrollHeight2 - scrollHeight
-  
-          area.scrollTo(
-            area.scrollLeft + widthDiff * xPerc,
-            area.scrollTop + heightDiff * yPerc
-          )
+        canvasRef.current.style.width = (_initialWidth * nextScale) + 'px';
+        canvasRef.current.style.height = (_initialHeight * nextScale) + 'px';
+
+        const { scrollHeight: scrollHeight2, scrollWidth: scrollWidth2 } = area;
+
+        const widthDiff = scrollWidth2 - scrollWidth
+        const heightDiff = scrollHeight2 - scrollHeight
+
+        area.scrollTo(
+          area.scrollLeft + widthDiff * xPerc,
+          area.scrollTop + heightDiff * yPerc
+        )
+
+        setScale(nextScale);
       }
     }
 
@@ -105,20 +110,25 @@ function Viewer(props) {
     return () => {
       document.body.removeEventListener('wheel', onWheel, { passive: false })
     }
-  }, [scale, zoom])
+  }, [])
 
   const onDocumentRef = ref => {
     if (ref) {
       documentRef = ref;
 
+      /* TODO: Check if this is enough for big PDFs - hundreds of pages. */
       if (!whset) {
         whset = true;
         setTimeout(() => {
           const { width, height } = ref.getBoundingClientRect();
-          setWidth(width);
-          setHeight(height);
-        }, 500)
+          _initialWidth = width;
+          _initialHeight = height;
+          canvasRef.current.style.width = width + 'px';
+          canvasRef.current.style.height = height + 'px';
 
+          rescaledRef.current.style.width = width + 'px';
+          rescaledRef.current.style.height = height + 'px';
+        }, 500)
       }
     }
   }
@@ -134,12 +144,11 @@ function Viewer(props) {
       }}
     >
 
-{/* TODO: Must get resized on scale changes */}
+      {/* TODO: Must get resized on scale changes */}
       <div
         id='canvas'
+        ref={canvasRef}
         style={{
-          width: _width * scale,
-          height: _height * scale,
           margin: 'auto'
         }}
       >
@@ -147,9 +156,7 @@ function Viewer(props) {
           id='rescaled'
           ref={rescaledRef}
           style={{
-            width: _width,
-            height: _height,
-            transform: `scale(${scale})`,
+            transform: 'scale(1)', // is being set in the React.useEffect()
             transformOrigin: '0 0',
           }}
         >
