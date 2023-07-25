@@ -70,18 +70,9 @@ function Viewer(props) {
   */
   React.useEffect(() => {
     const area = document.getElementById("available-space")
-    // let timeout = null;
 
     const onWheel = (e) => {
       if (e.ctrlKey) {
-
-        // if (timeout) clearTimeout(timeout);
-        // timeout = setTimeout(() => {
-        //   clearTimeout(timeout);
-        //   setZoom(zoom * scale);
-        //   setScale(1);
-        //   // zoom to proper point here
-        // }, 1000)
 
         e.preventDefault()
         const { scrollHeight, scrollWidth } = area;
@@ -94,15 +85,12 @@ function Viewer(props) {
 
         // Those don't need to be in a state. directly add them to ref.current.styles.transform = scale(...)
         const currentScale = rescaledRef.current.style.transform.slice(6, rescaledRef.current.style.transform.length - 1)
-        console.log("scaling to:", parseFloat(currentScale) + (detectMouseWheelDirection(e) === 'up' ? 0.1 : -0.1))
         rescaledRef.current.style.transform = `scale(${parseFloat(currentScale) + (detectMouseWheelDirection(e) === 'up' ? 0.1 : -0.1)})`
 
           const { scrollHeight: scrollHeight2, scrollWidth: scrollWidth2 } = area;
   
           const widthDiff = scrollWidth2 - scrollWidth
           const heightDiff = scrollHeight2 - scrollHeight
-  
-          console.log(widthDiff, heightDiff)
   
           area.scrollTo(
             area.scrollLeft + widthDiff * xPerc,
@@ -111,19 +99,13 @@ function Viewer(props) {
       }
     }
 
+    /* TODO: Clarity on Ctrl UP */
+    /* TODO: Max zoom. BLurred zoom might not be able to get clear picture on PDF re-render */
     document.body.addEventListener('wheel', onWheel, { passive: false });
-    return () => document.body.removeEventListener('wheel', onWheel, { passive: false })
+    return () => {
+      document.body.removeEventListener('wheel', onWheel, { passive: false })
+    }
   }, [scale, zoom])
-
-  // React.useEffect(() => {
-  //   documentRef.style.transform = `scale(1)`
-  //   Object
-  //       .values(pageRefs)
-  //       .forEach(page => {
-  //         page.style.transform = `scale(${scale})`
-  //       })
-  // }, [scale, pageRefs, documentRef])
-
 
   const onDocumentRef = ref => {
     if (ref) {
@@ -152,6 +134,7 @@ function Viewer(props) {
       }}
     >
 
+{/* TODO: Must get resized on scale changes */}
       <div
         id='canvas'
         style={{
