@@ -69,6 +69,8 @@ function Viewer(props) {
   */
   React.useEffect(() => {
     const area = document.getElementById("available-space")
+    let pdfScale = null;
+    let scrollPosition = [0, 0];
 
     const onWheel = (e) => {
       if (e.ctrlKey) {
@@ -85,6 +87,7 @@ function Viewer(props) {
         // Those don't need to be in a state. directly add them to ref.current.styles.transform = scale(...)
         const currentScale = rescaledRef.current.style.transform.slice(6, rescaledRef.current.style.transform.length - 1)
         const nextScale = parseFloat(currentScale) + (detectMouseWheelDirection(e) === 'up' ? 0.1 : -0.1);
+        pdfScale = nextScale;
         rescaledRef.current.style.transform = `scale(${nextScale})`
 
         canvasRef.current.style.width = (_initialWidth * nextScale) + 'px';
@@ -95,20 +98,31 @@ function Viewer(props) {
         const widthDiff = scrollWidth2 - scrollWidth
         const heightDiff = scrollHeight2 - scrollHeight
 
-        area.scrollTo(
+        scrollPosition = [
           area.scrollLeft + widthDiff * xPerc,
           area.scrollTop + heightDiff * yPerc
-        )
+        ]
 
-        setScale(nextScale);
+        area.scrollTo(...scrollPosition)
+      }
+    }
+
+    const onKeyUp = e => {
+      if (e.key === 'Control') {
+        setScale(pdfScale);
+        setTimeout(() => {
+          document.getElementById("available-space").scrollTo(...scrollPosition)
+        }, 2000)
       }
     }
 
     /* TODO: Clarity on Ctrl UP */
     /* TODO: Max zoom. BLurred zoom might not be able to get clear picture on PDF re-render */
     document.body.addEventListener('wheel', onWheel, { passive: false });
+    document.body.addEventListener('keyup', onKeyUp, { passive: false })
     return () => {
       document.body.removeEventListener('wheel', onWheel, { passive: false })
+      document.body.removeEventListener('keyup', onKeyUp, { passive: false })
     }
   }, [])
 
@@ -169,7 +183,7 @@ function Viewer(props) {
               return (
                 <Page key={index}
                   inputRef={ref => { pageRefs[index + 1] = ref; }}
-                  // scale={zoom}
+                  scale={scale}
                   pageNumber={index + 1}
                 />
               )
