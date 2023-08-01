@@ -1,11 +1,9 @@
 import { pdfjs } from 'react-pdf';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Document, Page } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 
-
-import React from 'react'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
@@ -50,8 +48,6 @@ function Viewer(props) {
   const [numPages, setNumPages] = useState();
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
-  /* This is the final scale used for the PDF viewer */
-  const [zoom, setZoom] = useState(1);
 
   let _initialWidth, _initialHeight;
 
@@ -69,7 +65,7 @@ function Viewer(props) {
   */
   React.useEffect(() => {
     const area = document.getElementById("available-space")
-    let pdfScale = null;
+    let pdfScale = 1;
     let scrollPosition = [0, 0];
 
     const onWheel = (e) => {
@@ -109,11 +105,20 @@ function Viewer(props) {
 
     const onKeyUp = e => {
       if (e.key === 'Control') {
+
+        /* 
+        Something like that for zoom above MAX_PDF_ZOOM
+        rescaledRef.current.style.transform = `scale(${cssScale / pdfScale}})`
+        */
         rescaledRef.current.style.transform = `scale(1)`
         setScale(scale * pdfScale)
+        /* TODO:
+          Instead of setTimeout, could this be a callback to some event handler of the Document?
+          Sometimes you'd get area indefined  
+        */
         setTimeout(() => {
           document.getElementById("available-space").scrollTo(...scrollPosition)
-        }, 100)
+        }, 200)
       }
     }
 
