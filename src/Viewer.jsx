@@ -109,10 +109,11 @@ function Viewer(props) {
 
     const onKeyUp = e => {
       if (e.key === 'Control') {
-        setScale(pdfScale);
+        rescaledRef.current.style.transform = `scale(1)`
+        setScale(scale * pdfScale)
         setTimeout(() => {
           document.getElementById("available-space").scrollTo(...scrollPosition)
-        }, 2000)
+        }, 100)
       }
     }
 
@@ -124,7 +125,7 @@ function Viewer(props) {
       document.body.removeEventListener('wheel', onWheel, { passive: false })
       document.body.removeEventListener('keyup', onKeyUp, { passive: false })
     }
-  }, [])
+  }, [_initialHeight, _initialWidth, scale])
 
   const onDocumentRef = ref => {
     if (ref) {
