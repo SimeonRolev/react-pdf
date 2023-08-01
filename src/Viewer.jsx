@@ -4,26 +4,25 @@ import { Document, Page } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { detectMouseWheelDirection } from './util';
-import { ZOOM_STEP } from "./constants"
+import { Mode, ZOOM_STEP } from "./constants"
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
   import.meta.url,
 ).toString();
 
-let whset = false
-
-
-function Viewer(props) {
+function Viewer() {
   const [numPages, setNumPages] = useState();
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
+  const [mode, setMode] = useState(Mode.NORMAL);
 
   const _initialWidth = React.useRef();
   const _initialHeight = React.useRef();
 
   const pageRefs = {}
   const documentRef = React.useRef();
+  const pdfScale = React.useRef();
   const canvasRef = React.useRef();
   const rescaledRef = React.useRef();
   const scrollPosition = React.useRef([0, 0]);
@@ -31,85 +30,108 @@ function Viewer(props) {
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
 
-    if (!whset) {
-      whset = true;
-      setTimeout(() => {
-        const { width, height } = documentRef.current.getBoundingClientRect();
-        _initialWidth.current = width;
-        _initialHeight.current = height;
-        canvasRef.current.style.width = width + 'px';
-        canvasRef.current.style.height = height + 'px';
+    setTimeout(() => {
+      const { width, height } = documentRef.current.getBoundingClientRect();
+      _initialWidth.current = width;
+      _initialHeight.current = height;
+      canvasRef.current.style.width = width + 'px';
+      canvasRef.current.style.height = height + 'px';
 
-        rescaledRef.current.style.width = width + 'px';
-        rescaledRef.current.style.height = height + 'px';
-      }, 500)
+      rescaledRef.current.style.width = width + 'px';
+      rescaledRef.current.style.height = height + 'px';
+    }, 500)
+  }
+
+  const getArea = () => {
+    return document.getElementById("available-space")
+  }
+
+  const zoomToCursor = React.useCallback((e, isUp = true) => {
+    const area = getArea()
+    const { scrollHeight, scrollWidth } = area;
+
+    const xPx = e.clientX + area.scrollLeft - area.offsetLeft
+    const yPx = e.clientY + area.scrollTop - area.offsetTop
+
+    const xPerc = xPx / scrollWidth
+    const yPerc = yPx / scrollHeight
+
+    // Those don't need to be in a state. directly add them to ref.current.styles.transform = scale(...)
+    const currentScale = rescaledRef.current.style.transform.slice(6, rescaledRef.current.style.transform.length - 1)
+    const nextScale = parseFloat(currentScale) + (isUp ? ZOOM_STEP : -ZOOM_STEP);
+    pdfScale.current = nextScale
+    rescaledRef.current.style.transform = `scale(${nextScale})`
+
+    // TODO: Doesn't rescale canvas properly on zoom in/out, only the first time. canvasRef doesn't get re-initialized?
+    canvasRef.current.style.width = (_initialWidth.current * nextScale) + 'px';
+    canvasRef.current.style.height = (_initialHeight.current * nextScale) + 'px';
+
+    const { scrollHeight: scrollHeight2, scrollWidth: scrollWidth2 } = area;
+
+    const widthDiff = scrollWidth2 - scrollWidth
+    const heightDiff = scrollHeight2 - scrollHeight
+
+    scrollPosition.current = [
+      area.scrollLeft + widthDiff * xPerc,
+      area.scrollTop + heightDiff * yPerc
+    ]
+
+    area.scrollTo(...scrollPosition.current)
+  }, [])
+
+  const rescalePDF = React.useCallback(() => {
+    _initialWidth.current = parseFloat(canvasRef.current.style.width)
+    _initialHeight.current = parseFloat(canvasRef.current.style.height)
+
+    /* 
+    Something like that for zoom above MAX_PDF_ZOOM
+    rescaledRef.current.style.transform = `scale(${cssScale / pdfScale}})`
+    */
+    rescaledRef.current.style.transform = `scale(1)`
+    rescaledRef.current.style.width = canvasRef.current.style.width;
+    rescaledRef.current.style.height = canvasRef.current.style.height;
+    setScale(scale * pdfScale.current)
+    /* TODO:
+      Instead of setTimeout, could this be a callback to some event handler of the Document?
+      Sometimes you'd get area indefined  
+    */
+    setTimeout(() => {
+      getArea().scrollTo(...scrollPosition.current)
+    }, 200)
+  }, [scale])
+
+  const modeHandlers = {
+    onClick: {
+      [Mode.NORMAL.name]: () => {},
+      [Mode.ZOOM_IN.name]: (e) => {
+        zoomToCursor(e, true)
+        rescalePDF()
+      },
+      [Mode.ZOOM_OUT.name]: (e) => {
+        zoomToCursor(e, false)
+        rescalePDF()
+      } 
     }
+  }
+
+  const onClick = (e) => {
+    modeHandlers.onClick[mode.name](e)
   }
 
   /* 
     https://github.com/wojtekmaj/react-pdf/issues/493
   */
   React.useEffect(() => {
-    const area = document.getElementById("available-space")
-    /* TODO: Can the tempCSSScale be React.useRef(1) */
-    let pdfScale = 1;
-
     const onWheel = (e) => {
       if (e.ctrlKey) {
-
         e.preventDefault()
-        const { scrollHeight, scrollWidth } = area;
-
-        const xPx = e.clientX + area.scrollLeft - area.offsetLeft
-        const yPx = e.clientY + area.scrollTop - area.offsetTop
-
-        const xPerc = xPx / scrollWidth
-        const yPerc = yPx / scrollHeight
-
-        // Those don't need to be in a state. directly add them to ref.current.styles.transform = scale(...)
-        const currentScale = rescaledRef.current.style.transform.slice(6, rescaledRef.current.style.transform.length - 1)
-        const nextScale = parseFloat(currentScale) + (detectMouseWheelDirection(e) === 'up' ? ZOOM_STEP : -ZOOM_STEP);
-        pdfScale = nextScale;
-        rescaledRef.current.style.transform = `scale(${nextScale})`
-
-        // TODO: Doesn't rescale canvas properly on zoom in/out, only the first time. canvasRef doesn't get re-initialized?
-        canvasRef.current.style.width = (_initialWidth.current * nextScale) + 'px';
-        canvasRef.current.style.height = (_initialHeight.current * nextScale) + 'px';
-
-        const { scrollHeight: scrollHeight2, scrollWidth: scrollWidth2 } = area;
-
-        const widthDiff = scrollWidth2 - scrollWidth
-        const heightDiff = scrollHeight2 - scrollHeight
-
-        scrollPosition.current = [
-          area.scrollLeft + widthDiff * xPerc,
-          area.scrollTop + heightDiff * yPerc
-        ]
-
-        area.scrollTo(...scrollPosition.current)
+        zoomToCursor(e, detectMouseWheelDirection(e) === 'up')
       }
     }
 
     const onKeyUp = e => {
-      if (e.key === 'Control') {
-        _initialWidth.current = parseFloat(canvasRef.current.style.width)
-        _initialHeight.current = parseFloat(canvasRef.current.style.height)
-
-        /* 
-        Something like that for zoom above MAX_PDF_ZOOM
-        rescaledRef.current.style.transform = `scale(${cssScale / pdfScale}})`
-        */
-        rescaledRef.current.style.transform = `scale(1)`
-        rescaledRef.current.style.width = canvasRef.current.style.width;
-        rescaledRef.current.style.height = canvasRef.current.style.height;
-        setScale(scale * pdfScale)
-        /* TODO:
-          Instead of setTimeout, could this be a callback to some event handler of the Document?
-          Sometimes you'd get area indefined  
-        */
-        setTimeout(() => {
-          document.getElementById("available-space").scrollTo(...scrollPosition.current)
-        }, 200)
+      if (e.key === 'Control' || [Mode.ZOOM_IN.name, Mode.ZOOM_OUT.name].includes[mode.name]) {
+        rescalePDF()
       }
     }
 
@@ -121,14 +143,14 @@ function Viewer(props) {
       document.body.removeEventListener('wheel', onWheel, { passive: false })
       document.body.removeEventListener('keyup', onKeyUp, { passive: false })
     }
-  }, [_initialHeight, _initialWidth, scale])
+  }, [_initialHeight, _initialWidth, scale, mode.name, zoomToCursor, rescalePDF])
 
   return (
     <div
       id="available-space"
       style={{
-        maxWidth: '100%',
-        maxHeight: '100%',
+        width: '100%',
+        height: '100%',
         display: 'flex',
         overflow: 'scroll',
       }}
@@ -148,7 +170,9 @@ function Viewer(props) {
           style={{
             transform: 'scale(1)', // is being set in the React.useEffect()
             transformOrigin: '0 0',
+            cursor: mode.cursor
           }}
+          onClick={onClick}
         >
           <Document
             inputRef={documentRef}
@@ -160,11 +184,16 @@ function Viewer(props) {
                 <Page key={index}
                   inputRef={ref => { pageRefs[index + 1] = ref; }}
                   scale={scale}
+                  width={1200}
                   pageNumber={index + 1}
                 />
               )
             })}
           </Document>
+          <div style={{ position: 'fixed', top: 0, zIndex: 9999 }}>
+            <button onClick={(e) => {e.stopPropagation(); setMode(Mode.ZOOM_IN)}}>Zoom in</button>
+            <button onClick={(e) => {e.stopPropagation(); setMode(Mode.ZOOM_OUT)}}>Zoom out</button>
+          </div>
         </div>
       </div>
     </div>
