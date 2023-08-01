@@ -23,12 +23,26 @@ function Viewer(props) {
   const _initialHeight = React.useRef();
 
   const pageRefs = {}
-  let documentRef = null;
+  let documentRef = React.useRef();
   let canvasRef = React.useRef();
   let rescaledRef = React.useRef();
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
+
+    if (!whset) {
+      whset = true;
+      setTimeout(() => {
+        const { width, height } = documentRef.current.getBoundingClientRect();
+        _initialWidth.current = width;
+        _initialHeight.current = height;
+        canvasRef.current.style.width = width + 'px';
+        canvasRef.current.style.height = height + 'px';
+
+        rescaledRef.current.style.width = width + 'px';
+        rescaledRef.current.style.height = height + 'px';
+      }, 500)
+    }
   }
 
   /* 
@@ -109,27 +123,6 @@ function Viewer(props) {
     }
   }, [_initialHeight, _initialWidth, scale])
 
-  const onDocumentRef = ref => {
-    if (ref) {
-      documentRef = ref;
-
-      /* TODO: Check if this is enough for big PDFs - hundreds of pages. */
-      if (!whset) {
-        whset = true;
-        setTimeout(() => {
-          const { width, height } = ref.getBoundingClientRect();
-          _initialWidth.current = width;
-          _initialHeight.current = height;
-          canvasRef.current.style.width = width + 'px';
-          canvasRef.current.style.height = height + 'px';
-
-          rescaledRef.current.style.width = width + 'px';
-          rescaledRef.current.style.height = height + 'px';
-        }, 500)
-      }
-    }
-  }
-
   return (
     <div
       id="available-space"
@@ -158,7 +151,7 @@ function Viewer(props) {
           }}
         >
           <Document
-            inputRef={onDocumentRef}
+            inputRef={documentRef}
             file="Public Library Sample.pdf"
             onLoadSuccess={onDocumentLoadSuccess}
           >
