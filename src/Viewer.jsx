@@ -86,6 +86,8 @@ function Viewer(props) {
         rescaledRef.current.style.transform = `scale(${cssScale / pdfScale}})`
         */
         rescaledRef.current.style.transform = `scale(1)`
+        rescaledRef.current.style.width = canvasRef.current.style.width;
+        rescaledRef.current.style.height = canvasRef.current.style.height;
         setScale(scale * pdfScale)
         /* TODO:
           Instead of setTimeout, could this be a callback to some event handler of the Document?
