@@ -3,43 +3,14 @@ import React, { useState } from 'react';
 import { Document, Page } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
+import { detectMouseWheelDirection } from './util';
+import { ZOOM_STEP, MAX_PDF_SCALE } from "./constants"
 
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
   import.meta.url,
 ).toString();
-
-/* 
-Scale only the visible pages
-*/
-function isElementInViewport(el) {
-  if (!el) return false;
-  var rect = el.getBoundingClientRect();
-
-  return rect.bottom > 0 &&
-    rect.right > 0 &&
-    rect.left < (window.innerWidth || document.documentElement.clientWidth) /* or $(window).width() */ &&
-    rect.top < (window.innerHeight || document.documentElement.clientHeight) /* or $(window).height() */;
-}
-
-function detectMouseWheelDirection(e) {
-  var delta = null,
-    direction = false;
-  if (!e) { // if the event is not provided, we get it from the window object
-    e = window.event;
-  }
-  if (e.wheelDelta) { // will work in most cases
-    delta = e.wheelDelta / 60;
-  } else if (e.detail) { // fallback for Firefox
-    delta = -e.detail / 2;
-  }
-  if (delta !== null) {
-    direction = delta > 0 ? 'up' : 'down';
-  }
-
-  return direction;
-}
 
 let whset = false
 
@@ -65,6 +36,7 @@ function Viewer(props) {
   */
   React.useEffect(() => {
     const area = document.getElementById("available-space")
+    /* TODO: Can the tempCSSScale be React.useRef(1) */
     let pdfScale = 1;
     let scrollPosition = [0, 0];
 
@@ -82,10 +54,11 @@ function Viewer(props) {
 
         // Those don't need to be in a state. directly add them to ref.current.styles.transform = scale(...)
         const currentScale = rescaledRef.current.style.transform.slice(6, rescaledRef.current.style.transform.length - 1)
-        const nextScale = parseFloat(currentScale) + (detectMouseWheelDirection(e) === 'up' ? 0.1 : -0.1);
+        const nextScale = parseFloat(currentScale) + (detectMouseWheelDirection(e) === 'up' ? ZOOM_STEP : -ZOOM_STEP);
         pdfScale = nextScale;
         rescaledRef.current.style.transform = `scale(${nextScale})`
 
+        // TODO: Doesn't rescale canvas properly on zoom in/out, only the first time. canvasRef doesn't get re-initialized?
         canvasRef.current.style.width = (_initialWidth * nextScale) + 'px';
         canvasRef.current.style.height = (_initialHeight * nextScale) + 'px';
 
