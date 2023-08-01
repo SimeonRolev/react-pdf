@@ -4,8 +4,7 @@ import { Document, Page } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { detectMouseWheelDirection } from './util';
-import { ZOOM_STEP, MAX_PDF_SCALE } from "./constants"
-
+import { ZOOM_STEP } from "./constants"
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
@@ -20,7 +19,8 @@ function Viewer(props) {
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
 
-  let _initialWidth, _initialHeight;
+  const _initialWidth = React.useRef();
+  const _initialHeight = React.useRef();
 
   const pageRefs = {}
   let documentRef = null;
@@ -59,8 +59,8 @@ function Viewer(props) {
         rescaledRef.current.style.transform = `scale(${nextScale})`
 
         // TODO: Doesn't rescale canvas properly on zoom in/out, only the first time. canvasRef doesn't get re-initialized?
-        canvasRef.current.style.width = (_initialWidth * nextScale) + 'px';
-        canvasRef.current.style.height = (_initialHeight * nextScale) + 'px';
+        canvasRef.current.style.width = (_initialWidth.current * nextScale) + 'px';
+        canvasRef.current.style.height = (_initialHeight.current * nextScale) + 'px';
 
         const { scrollHeight: scrollHeight2, scrollWidth: scrollWidth2 } = area;
 
@@ -78,6 +78,8 @@ function Viewer(props) {
 
     const onKeyUp = e => {
       if (e.key === 'Control') {
+        _initialWidth.current = parseFloat(canvasRef.current.style.width)
+        _initialHeight.current = parseFloat(canvasRef.current.style.height)
 
         /* 
         Something like that for zoom above MAX_PDF_ZOOM
@@ -114,8 +116,8 @@ function Viewer(props) {
         whset = true;
         setTimeout(() => {
           const { width, height } = ref.getBoundingClientRect();
-          _initialWidth = width;
-          _initialHeight = height;
+          _initialWidth.current = width;
+          _initialHeight.current = height;
           canvasRef.current.style.width = width + 'px';
           canvasRef.current.style.height = height + 'px';
 
