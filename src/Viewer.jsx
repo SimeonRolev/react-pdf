@@ -23,9 +23,10 @@ function Viewer(props) {
   const _initialHeight = React.useRef();
 
   const pageRefs = {}
-  let documentRef = React.useRef();
-  let canvasRef = React.useRef();
-  let rescaledRef = React.useRef();
+  const documentRef = React.useRef();
+  const canvasRef = React.useRef();
+  const rescaledRef = React.useRef();
+  const scrollPosition = React.useRef([0, 0]);
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
@@ -52,7 +53,6 @@ function Viewer(props) {
     const area = document.getElementById("available-space")
     /* TODO: Can the tempCSSScale be React.useRef(1) */
     let pdfScale = 1;
-    let scrollPosition = [0, 0];
 
     const onWheel = (e) => {
       if (e.ctrlKey) {
@@ -81,12 +81,12 @@ function Viewer(props) {
         const widthDiff = scrollWidth2 - scrollWidth
         const heightDiff = scrollHeight2 - scrollHeight
 
-        scrollPosition = [
+        scrollPosition.current = [
           area.scrollLeft + widthDiff * xPerc,
           area.scrollTop + heightDiff * yPerc
         ]
 
-        area.scrollTo(...scrollPosition)
+        area.scrollTo(...scrollPosition.current)
       }
     }
 
@@ -108,7 +108,7 @@ function Viewer(props) {
           Sometimes you'd get area indefined  
         */
         setTimeout(() => {
-          document.getElementById("available-space").scrollTo(...scrollPosition)
+          document.getElementById("available-space").scrollTo(...scrollPosition.current)
         }, 200)
       }
     }
