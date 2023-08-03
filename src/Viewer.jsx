@@ -5,6 +5,7 @@ import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { detectMouseWheelDirection } from './util';
 import { Mode, ZOOM_STEP } from "./constants"
+import { usePan } from './Pan';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
@@ -16,6 +17,10 @@ function Viewer() {
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
   const [mode, setMode] = useState(Mode.NORMAL);
+  const panProps = usePan({
+    active: mode.name === Mode.PAN.name,
+    getNode: () => document.getElementById("available-space")
+  });
 
   const _initialWidth = React.useRef();
   const _initialHeight = React.useRef();
@@ -164,7 +169,11 @@ function Viewer() {
           onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.ZOOM_OUT.name ? Mode.NORMAL : Mode.ZOOM_OUT) }}
           style={{ backgroundColor: mode.name === Mode.ZOOM_OUT.name ? 'lightcyan' : undefined }}  
         >Zoom out</button>
-      </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.PAN.name ? Mode.NORMAL : Mode.PAN) }}
+          style={{ backgroundColor: mode.name === Mode.PAN.name ? 'lightcyan' : undefined }}  
+        >Pan</button>
+      </div>;
 
       {/* TODO: Must get resized on scale changes */}
       <div
@@ -183,6 +192,7 @@ function Viewer() {
             cursor: mode.cursor
           }}
           onClick={onClick}
+          {...panProps}
         >
           <Document
             inputRef={documentRef}

@@ -15,4 +15,8 @@ export class Mode {
         name: 'zoom-out',
         cursor: 'zoom-out'
     };
+    static PAN = {
+        name: 'pan',
+        cursor: 'grab'
+    };
 }
