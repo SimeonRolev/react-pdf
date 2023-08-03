@@ -102,7 +102,7 @@ function Viewer() {
 
   const modeHandlers = {
     onClick: {
-      [Mode.NORMAL.name]: () => {},
+      [Mode.NORMAL.name]: () => { },
       [Mode.ZOOM_IN.name]: (e) => {
         zoomToCursor(e, true)
         rescalePDF()
@@ -110,7 +110,7 @@ function Viewer() {
       [Mode.ZOOM_OUT.name]: (e) => {
         zoomToCursor(e, false)
         rescalePDF()
-      } 
+      }
     }
   }
 
@@ -155,6 +155,16 @@ function Viewer() {
         overflow: 'scroll',
       }}
     >
+      <div style={{ position: 'fixed', top: 0, zIndex: 9999 }}>
+        <button
+          onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.ZOOM_IN.name ? Mode.NORMAL : Mode.ZOOM_IN) }}
+          style={{ backgroundColor: mode.name === Mode.ZOOM_IN.name ? 'lightcyan' : undefined }}  
+        >Zoom in</button>
+        <button
+          onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.ZOOM_OUT.name ? Mode.NORMAL : Mode.ZOOM_OUT) }}
+          style={{ backgroundColor: mode.name === Mode.ZOOM_OUT.name ? 'lightcyan' : undefined }}  
+        >Zoom out</button>
+      </div>
 
       {/* TODO: Must get resized on scale changes */}
       <div
@@ -190,10 +200,6 @@ function Viewer() {
               )
             })}
           </Document>
-          <div style={{ position: 'fixed', top: 0, zIndex: 9999 }}>
-            <button onClick={(e) => {e.stopPropagation(); setMode(Mode.ZOOM_IN)}}>Zoom in</button>
-            <button onClick={(e) => {e.stopPropagation(); setMode(Mode.ZOOM_OUT)}}>Zoom out</button>
-          </div>
         </div>
       </div>
     </div>

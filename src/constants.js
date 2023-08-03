@@ -5,7 +5,7 @@ export const MAX_CSS_SCALE = 25;
 export class Mode {
     static NORMAL = {
         name: 'normal',
-        cursor: 'normal'
+        cursor: 'default'
     };
     static ZOOM_IN = {
         name: 'zoom-in',
