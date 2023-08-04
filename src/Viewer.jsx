@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Document, Page } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
-import { detectMouseWheelDirection } from './util';
+import { detectMouseWheelDirection, isScaleValid } from './util';
 import { Mode, ZOOM_STEP } from "./constants"
 import { usePan } from './Pan';
 
@@ -28,11 +28,12 @@ function Viewer() {
   
   const pageRefs = {}
   const documentRef = React.useRef();
-  const pdfScale = React.useRef();
+  const pdfScale = React.useRef(1);
   const canvasRef = React.useRef();
   const rescaledRef = React.useRef();
   const ghostRef = React.useRef();
   const scrollPosition = React.useRef([0, 0]);
+  const wheeling = React.useRef(false);
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
@@ -68,6 +69,7 @@ function Viewer() {
     // Those don't need to be in a state. directly add them to ref.current.styles.transform = scale(...)
     const currentScale = rescaledRef.current.style.transform.slice(6, rescaledRef.current.style.transform.length - 1)
     const nextScale = parseFloat(currentScale) + (isUp ? ZOOM_STEP : -ZOOM_STEP);
+    if (!isScaleValid(nextScale * scale)) return;
     pdfScale.current = nextScale
     rescaledRef.current.style.transform = `scale(${nextScale})`
 
@@ -86,9 +88,12 @@ function Viewer() {
     ]
 
     area.scrollTo(...scrollPosition.current)
-  }, [])
+  }, [scale])
 
   const rescalePDF = React.useCallback(() => {
+    const resultScale = scale * pdfScale.current
+    if (!isScaleValid(resultScale)) return;
+
     _initialWidth.current = parseFloat(canvasRef.current.style.width)
     _initialHeight.current = parseFloat(canvasRef.current.style.height)
 
@@ -99,7 +104,6 @@ function Viewer() {
     rescaledRef.current.style.transform = `scale(1)`
     rescaledRef.current.style.width = canvasRef.current.style.width;
     rescaledRef.current.style.height = canvasRef.current.style.height;
-    const resultScale = scale * pdfScale.current
     ghostRef.current.style.transform = `scale(${resultScale})`
     setScale(resultScale)
     setTransition(true)
@@ -138,6 +142,7 @@ function Viewer() {
   */
   React.useEffect(() => {
     const onWheel = (e) => {
+      wheeling.current = true;
       if (e.ctrlKey) {
         e.preventDefault()
         zoomToCursor(e, detectMouseWheelDirection(e) === 'up')
@@ -145,7 +150,13 @@ function Viewer() {
     }
 
     const onKeyUp = e => {
-      if (e.key === 'Control' || [Mode.ZOOM_IN.name, Mode.ZOOM_OUT.name].includes[mode.name]) {
+      if (e.key === 'Control') {
+        if (wheeling.current === true) {
+          wheeling.current = false;
+          rescalePDF()
+        }
+      }
+      if ([Mode.ZOOM_IN.name, Mode.ZOOM_OUT.name].includes[mode.name]) {
         rescalePDF()
       }
     }
@@ -183,7 +194,7 @@ function Viewer() {
           onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.PAN.name ? Mode.NORMAL : Mode.PAN) }}
           style={{ backgroundColor: mode.name === Mode.PAN.name ? 'lightcyan' : undefined }}  
         >Pan</button>
-      </div>;
+      </div>
 
       {/* TODO: Must get resized on scale changes */}
       <div
