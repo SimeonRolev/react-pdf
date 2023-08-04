@@ -26,9 +26,6 @@ function Viewer() {
   const _initialWidth = React.useRef();
   const _initialHeight = React.useRef();
   
-  const _firstWidth = React.useRef();
-  const _firstHeight = React.useRef();
-
   const pageRefs = {}
   const documentRef = React.useRef();
   const pdfScale = React.useRef();
@@ -44,13 +41,13 @@ function Viewer() {
       const { width, height } = documentRef.current.getBoundingClientRect();
       _initialWidth.current = width;
       _initialHeight.current = height;
-      _firstWidth.current = width;
-      _firstHeight.current = height;
       canvasRef.current.style.width = width + 'px';
       canvasRef.current.style.height = height + 'px';
 
       rescaledRef.current.style.width = width + 'px';
       rescaledRef.current.style.height = height + 'px';
+      ghostRef.current.style.width = width + 'px';
+      ghostRef.current.style.height = height + 'px';
     }, 500)
   }
 
@@ -104,8 +101,6 @@ function Viewer() {
     rescaledRef.current.style.height = canvasRef.current.style.height;
     const resultScale = scale * pdfScale.current
     ghostRef.current.style.transform = `scale(${resultScale})`
-    ghostRef.current.style.width = (_firstWidth.current / resultScale)+ 'px';
-    ghostRef.current.style.height = (_firstHeight.current / resultScale) + "px";
     setScale(resultScale)
     setTransition(true)
     setTimeout(() => {
@@ -208,7 +203,8 @@ function Viewer() {
             transform: 'scale(1)', // is being set in the React.useEffect()
             transformOrigin: '0 0',
             cursor: mode.cursor,
-            opacity: transition ? 1 : 0
+            opacity: transition ? 1 : 0,
+            display: transition ? 'block' : "none"
           }}
           key={42}
         >
