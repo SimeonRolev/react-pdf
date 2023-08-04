@@ -204,7 +204,8 @@ function Viewer() {
             transformOrigin: '0 0',
             cursor: mode.cursor,
             opacity: transition ? 1 : 0,
-            display: transition ? 'block' : "none"
+            display: transition ? 'block' : "none",
+            filter: "blur(1px)"
           }}
           key={42}
         >
