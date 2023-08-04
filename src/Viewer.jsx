@@ -16,6 +16,7 @@ function Viewer() {
   const [numPages, setNumPages] = useState();
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
+  const [transition, setTransition] = useState(false);
   const [mode, setMode] = useState(Mode.NORMAL);
   const panProps = usePan({
     active: mode.name === Mode.PAN.name,
@@ -24,12 +25,16 @@ function Viewer() {
 
   const _initialWidth = React.useRef();
   const _initialHeight = React.useRef();
+  
+  const _firstWidth = React.useRef();
+  const _firstHeight = React.useRef();
 
   const pageRefs = {}
   const documentRef = React.useRef();
   const pdfScale = React.useRef();
   const canvasRef = React.useRef();
   const rescaledRef = React.useRef();
+  const ghostRef = React.useRef();
   const scrollPosition = React.useRef([0, 0]);
 
   function onDocumentLoadSuccess({ numPages }) {
@@ -39,6 +44,8 @@ function Viewer() {
       const { width, height } = documentRef.current.getBoundingClientRect();
       _initialWidth.current = width;
       _initialHeight.current = height;
+      _firstWidth.current = width;
+      _firstHeight.current = height;
       canvasRef.current.style.width = width + 'px';
       canvasRef.current.style.height = height + 'px';
 
@@ -95,7 +102,15 @@ function Viewer() {
     rescaledRef.current.style.transform = `scale(1)`
     rescaledRef.current.style.width = canvasRef.current.style.width;
     rescaledRef.current.style.height = canvasRef.current.style.height;
-    setScale(scale * pdfScale.current)
+    const resultScale = scale * pdfScale.current
+    ghostRef.current.style.transform = `scale(${resultScale})`
+    ghostRef.current.style.width = (_firstWidth.current / resultScale)+ 'px';
+    ghostRef.current.style.height = (_firstHeight.current / resultScale) + "px";
+    setScale(resultScale)
+    setTransition(true)
+    setTimeout(() => {
+      setTransition(false)
+    }, 500)
     /* TODO:
       Instead of setTimeout, could this be a callback to some event handler of the Document?
       Sometimes you'd get area indefined  
@@ -103,7 +118,7 @@ function Viewer() {
     setTimeout(() => {
       getArea().scrollTo(...scrollPosition.current)
     }, 200)
-  }, [scale])
+  }, [scale, ghostRef])
 
   const modeHandlers = {
     onClick: {
@@ -180,16 +195,50 @@ function Viewer() {
         id='canvas'
         ref={canvasRef}
         style={{
-          margin: 'auto'
+          margin: 'auto',
+          position: 'relative'
         }}
       >
+        <div
+          id='rescaled-ghost'
+          ref={ghostRef}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            transform: 'scale(1)', // is being set in the React.useEffect()
+            transformOrigin: '0 0',
+            cursor: mode.cursor,
+            opacity: transition ? 1 : 0
+          }}
+          key={42}
+        >
+
+            <Document
+              key={42}
+              inputRef={documentRef}
+              file="Public Library Sample.pdf"
+              onLoadSuccess={onDocumentLoadSuccess}
+            >
+              {Array(numPages).fill(42).map((_, index) => {
+                return (
+                  <Page
+                    key={index}
+                    scale={1}
+                    width={1200}
+                    pageNumber={index + 1}
+                  />
+                )
+              })}
+            </Document>
+        </div>
         <div
           id='rescaled'
           ref={rescaledRef}
           style={{
             transform: 'scale(1)', // is being set in the React.useEffect()
             transformOrigin: '0 0',
-            cursor: mode.cursor
+            cursor: mode.cursor,
+            opacity: transition ? 0 : 1
           }}
           onClick={onClick}
           {...panProps}
