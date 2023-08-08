@@ -226,7 +226,7 @@ function Viewer() {
             <Document
               key={42}
               inputRef={documentRef}
-              file="Public Library Sample.pdf"
+              file="My export.pdf"
               onLoadSuccess={onDocumentLoadSuccess}
             >
               {Array(numPages).fill(42).map((_, index) => {
@@ -234,7 +234,6 @@ function Viewer() {
                   <Page
                     key={index}
                     scale={1}
-                    width={1200}
                     pageNumber={index + 1}
                   />
                 )
@@ -255,7 +254,7 @@ function Viewer() {
         >
           <Document
             inputRef={documentRef}
-            file="Public Library Sample.pdf"
+            file="My export.pdf"
             onLoadSuccess={onDocumentLoadSuccess}
           >
             {Array(numPages).fill(42).map((_, index) => {
@@ -268,8 +267,10 @@ function Viewer() {
                     }
                   }}
                   scale={scale}
-                  width={1200}
                   pageNumber={index + 1}
+                  onLoadSuccess={(page) => {
+                    console.log(page.width, page.height)
+                  }}
                 />
               )
             })}
