@@ -1,5 +1,6 @@
 import { pdfjs } from 'react-pdf';
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Document, Page } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
@@ -18,6 +19,7 @@ function Viewer() {
   const [scale, setScale] = useState(1);
   const [transition, setTransition] = useState(false);
   const [mode, setMode] = useState(Mode.NORMAL);
+  const [annotations, setAnnotations] = useState(false)
   const panProps = usePan({
     active: mode.name === Mode.PAN.name,
     getNode: () => document.getElementById("available-space")
@@ -25,8 +27,8 @@ function Viewer() {
 
   const _initialWidth = React.useRef();
   const _initialHeight = React.useRef();
-  
-  const pageRefs = {}
+
+  const pageRefs = React.useRef({});
   const documentRef = React.useRef();
   const pdfScale = React.useRef(1);
   const canvasRef = React.useRef();
@@ -184,15 +186,15 @@ function Viewer() {
       <div style={{ position: 'fixed', top: 0, zIndex: 9999 }}>
         <button
           onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.ZOOM_IN.name ? Mode.NORMAL : Mode.ZOOM_IN) }}
-          style={{ backgroundColor: mode.name === Mode.ZOOM_IN.name ? 'lightcyan' : undefined }}  
+          style={{ backgroundColor: mode.name === Mode.ZOOM_IN.name ? 'lightcyan' : undefined }}
         >Zoom in</button>
         <button
           onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.ZOOM_OUT.name ? Mode.NORMAL : Mode.ZOOM_OUT) }}
-          style={{ backgroundColor: mode.name === Mode.ZOOM_OUT.name ? 'lightcyan' : undefined }}  
+          style={{ backgroundColor: mode.name === Mode.ZOOM_OUT.name ? 'lightcyan' : undefined }}
         >Zoom out</button>
         <button
           onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.PAN.name ? Mode.NORMAL : Mode.PAN) }}
-          style={{ backgroundColor: mode.name === Mode.PAN.name ? 'lightcyan' : undefined }}  
+          style={{ backgroundColor: mode.name === Mode.PAN.name ? 'lightcyan' : undefined }}
         >Pan</button>
       </div>
 
@@ -259,7 +261,12 @@ function Viewer() {
             {Array(numPages).fill(42).map((_, index) => {
               return (
                 <Page key={index}
-                  inputRef={ref => { pageRefs[index + 1] = ref; }}
+                  inputRef={ref => {
+                    pageRefs.current[index + 1] = ref;
+                    if (index + 1 === numPages) {
+                      setAnnotations(true)
+                    }
+                  }}
                   scale={scale}
                   width={1200}
                   pageNumber={index + 1}
@@ -267,6 +274,16 @@ function Viewer() {
               )
             })}
           </Document>
+          {
+            annotations && Object.values(pageRefs.current).map(page => {
+              return (
+                createPortal(
+                  <div id='test' />,
+                  page,
+                )
+              )
+            })
+          }
         </div>
       </div>
     </div>
