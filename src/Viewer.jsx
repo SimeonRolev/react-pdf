@@ -277,10 +277,11 @@ function Viewer() {
           {
             annotations && Object.values(pageRefs.current).map(page => {
               return (
-                createPortal(
-                  <div id='test' />,
-                  page,
-                )
+                null
+                // createPortal(
+                //   <div id='test' />,
+                //   page,
+                // )
               )
             })
           }
