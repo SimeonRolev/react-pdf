@@ -18,6 +18,13 @@ export class Point {
             y: -this.top + 400
         }
     }
+
+    relativeToPage (page) {
+        return {
+            top: this.top / page.height,
+            left: this.left / page.width,
+        }
+    }
 }
 
 export class Page {
@@ -26,5 +33,12 @@ export class Page {
         this.height = height;
         this.dpi = dpi;
         this.dpmm = dpi / 25.4;
+    }
+}
+
+export class PointInPage {
+    constructor (point, page) {
+        this.left = point.left / page.width;
+        this.top = point.top / page.height;
     }
 }

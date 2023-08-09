@@ -1,19 +1,22 @@
-import { pdfjs } from 'react-pdf';
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
+import PropTypes from 'prop-types'
+
 import { Document, Page } from 'react-pdf';
+import { pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { detectMouseWheelDirection, isScaleValid } from './util';
 import { Mode, ZOOM_STEP } from "./constants"
 import { usePan } from './Pan';
+import Overlay from './Annotations/Overlay';
+import { Point, PointInPage, Page as PageClass } from './point';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
   import.meta.url,
 ).toString();
 
-function Viewer() {
+function Viewer({ points }) {
   const [numPages, setNumPages] = useState();
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
@@ -223,22 +226,22 @@ function Viewer() {
           key={42}
         >
 
-            <Document
-              key={42}
-              inputRef={documentRef}
-              file="My export.pdf"
-              onLoadSuccess={onDocumentLoadSuccess}
-            >
-              {Array(numPages).fill(42).map((_, index) => {
-                return (
-                  <Page
-                    key={index}
-                    scale={1}
-                    pageNumber={index + 1}
-                  />
-                )
-              })}
-            </Document>
+          <Document
+            key={42}
+            inputRef={documentRef}
+            file="My export.pdf"
+            onLoadSuccess={onDocumentLoadSuccess}
+          >
+            {Array(numPages).fill(42).map((_, index) => {
+              return (
+                <Page
+                  key={index}
+                  scale={1}
+                  pageNumber={index + 1}
+                />
+              )
+            })}
+          </Document>
         </div>
         <div
           id='rescaled'
@@ -259,39 +262,57 @@ function Viewer() {
           >
             {Array(numPages).fill(42).map((_, index) => {
               return (
-                <Page key={index}
+                <Page
+                  key={index}
                   inputRef={ref => {
-                    pageRefs.current[index + 1] = ref;
-                    if (index + 1 === numPages) {
-                      setAnnotations(true)
+                    if (pageRefs.current[index + 1]) {
+                      pageRefs.current[index + 1].ref = ref;
+                    } else {
+                      pageRefs.current[index + 1] = { ref };
                     }
                   }}
                   scale={scale}
                   pageNumber={index + 1}
                   onLoadSuccess={(page) => {
-                    console.log(page.width, page.height)
+                    if (pageRefs.current[index + 1]) {
+                      pageRefs.current[index + 1].page = page;
+                    } else {
+                      pageRefs.current[index + 1] = { page };
+                    }
+                    setAnnotations(true)
                   }}
-                />
+                >
+                  {annotations &&
+                    <Overlay points={
+                      points.map(({ x, y }) => {
+                        return new PointInPage(
+                          Point.fromCenter({
+                            x,
+                            y,
+                            pageWidth: pageRefs.current[index + 1].page.width,
+                            pageHeight: pageRefs.current[index + 1].page.height,
+                          }),
+                          new PageClass({
+                            width: pageRefs.current[index + 1].page.width,
+                            height: pageRefs.current[index + 1].page.height,
+                            dpi: 72
+                          })
+                        )
+                      })
+                    } />
+                  }
+                </Page>
               )
             })}
           </Document>
-          {
-            annotations && Object.values(pageRefs.current).map(page => {
-              return (
-                null
-                // createPortal(
-                //   <div id='test' />,
-                //   page,
-                // )
-              )
-            })
-          }
         </div>
       </div>
     </div>
   )
 }
 
-Viewer.propTypes = {}
+Viewer.propTypes = {
+  points: PropTypes.arrayOf(PropTypes.instanceOf(Point))
+}
 
 export default Viewer
