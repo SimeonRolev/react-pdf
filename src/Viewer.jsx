@@ -17,12 +17,13 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 function Viewer({ points }) {
-  const [numPages, setNumPages] = useState();
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
   const [transition, setTransition] = useState(false);
   const [mode, setMode] = useState(Mode.NORMAL);
-  const [annotations, setAnnotations] = useState(false)
+
+  const [loading, setLoading] = useState(true);
+
   const panProps = usePan({
     active: mode.name === Mode.PAN.name,
     getNode: () => document.getElementById("available-space")
@@ -40,11 +41,20 @@ function Viewer({ points }) {
   const scrollPosition = React.useRef([0, 0]);
   const wheeling = React.useRef(false);
 
-  function onDocumentLoadSuccess({ numPages }) {
-    setNumPages(numPages);
+  function onDocumentLoadSuccess(pdfDoc) {
+    Promise.all(
+      [...new Array(pdfDoc.numPages)]
+        .map((_, index) => pdfDoc.getPage(index + 1))
+    ).then(pages => {
+      pages.forEach(page => {
+        page.width = page.view[2];
+        page.height = page.view[3];
+        pageRefs.current[page.pageNumber] = page
+      })
 
-    setTimeout(() => {
-      const { width, height } = documentRef.current.getBoundingClientRect();
+      const width = Math.max(...pages.map(p => p.width))
+      const height = pages.reduce((acc, curr) => acc + curr.height, 0);
+
       _initialWidth.current = width;
       _initialHeight.current = height;
       canvasRef.current.style.width = width + 'px';
@@ -54,7 +64,10 @@ function Viewer({ points }) {
       rescaledRef.current.style.height = height + 'px';
       ghostRef.current.style.width = width + 'px';
       ghostRef.current.style.height = height + 'px';
-    }, 500)
+
+      setLoading(false)
+    })
+
   }
 
   const getArea = () => {
@@ -225,22 +238,22 @@ function Viewer({ points }) {
           }}
           key={42}
         >
-
           <Document
             key={42}
-            inputRef={documentRef}
-            file="My export.pdf"
-            onLoadSuccess={onDocumentLoadSuccess}
+            file="Public Library Sample.pdf"
           >
-            {Array(numPages).fill(42).map((_, index) => {
-              return (
-                <Page
-                  key={index}
-                  scale={1}
-                  pageNumber={index + 1}
-                />
-              )
-            })}
+            {(
+              Object.values(pageRefs.current).map(page => {
+                return (
+                  <Page
+                    key={page.pageNumber}
+                    scale={1}
+                    pageNumber={page.pageNumber}
+                  >
+                  </Page>
+                )
+              })
+            )}
           </Document>
         </div>
         <div
@@ -257,46 +270,33 @@ function Viewer({ points }) {
         >
           <Document
             inputRef={documentRef}
-            file="My export.pdf"
+            file="Public Library Sample.pdf"
             onLoadSuccess={onDocumentLoadSuccess}
           >
-            {Array(numPages).fill(42).map((_, index) => {
-              return (
-                <Page
-                  key={index}
-                  inputRef={ref => {
-                    if (pageRefs.current[index + 1]) {
-                      pageRefs.current[index + 1].ref = ref;
-                    } else {
-                      pageRefs.current[index + 1] = { ref };
-                    }
-                  }}
-                  scale={scale}
-                  pageNumber={index + 1}
-                  onLoadSuccess={(page) => {
-                    if (pageRefs.current[index + 1]) {
-                      pageRefs.current[index + 1].page = page;
-                    } else {
-                      pageRefs.current[index + 1] = { page };
-                    }
-                    setAnnotations(true)
-                  }}
-                >
-                  {annotations &&
+            {!loading && (
+              Object.values(pageRefs.current).map(page => {
+                return (
+                  <Page
+                    key={page.pageNumber}
+                    scale={scale}
+                    pageNumber={page.pageNumber}
+                  >
                     <Overlay points={
                       points.map(({ x, y }) => {
-                        const page = new PageClass({
-                          width: pageRefs.current[index + 1].page.width,
-                          height: pageRefs.current[index + 1].page.height,
-                          dpi: 72
+                        return Point.fromCenter({
+                          x, y, page: new PageClass({
+                            width: page.width,
+                            height: page.height,
+                            dpi: 72
+                          })
                         })
-                        return Point.fromCenter({x, y, page})
                       })
                     } />
-                  }
-                </Page>
-              )
-            })}
+                  </Page>
+                )
+              })
+            )}
+
           </Document>
         </div>
       </div>
