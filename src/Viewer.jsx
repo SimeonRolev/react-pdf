@@ -16,7 +16,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-function Viewer({ points }) {
+function Viewer({ fileName, points }) {
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
   const [transition, setTransition] = useState(false);
@@ -240,7 +240,7 @@ function Viewer({ points }) {
         >
           <Document
             key={42}
-            file="Public Library Sample.pdf"
+            file={fileName}
           >
             {(
               Object.values(pageRefs.current).map(page => {
@@ -270,7 +270,7 @@ function Viewer({ points }) {
         >
           <Document
             inputRef={documentRef}
-            file="Public Library Sample.pdf"
+            file={fileName}
             onLoadSuccess={onDocumentLoadSuccess}
           >
             {!loading && (
@@ -305,6 +305,7 @@ function Viewer({ points }) {
 }
 
 Viewer.propTypes = {
+  fileName: PropTypes.string,
   points: PropTypes.arrayOf(PropTypes.instanceOf(Point))
 }
 
