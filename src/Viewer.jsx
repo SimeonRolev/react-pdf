@@ -9,7 +9,7 @@ import { detectMouseWheelDirection, isScaleValid } from './util';
 import { Mode, ZOOM_STEP } from "./constants"
 import { usePan } from './Pan';
 import Overlay from './Annotations/Overlay';
-import { Point, PointInPage, Page as PageClass } from './point';
+import { Point, Page as PageClass } from './point';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
@@ -285,19 +285,12 @@ function Viewer({ points }) {
                   {annotations &&
                     <Overlay points={
                       points.map(({ x, y }) => {
-                        return new PointInPage(
-                          Point.fromCenter({
-                            x,
-                            y,
-                            pageWidth: pageRefs.current[index + 1].page.width,
-                            pageHeight: pageRefs.current[index + 1].page.height,
-                          }),
-                          new PageClass({
-                            width: pageRefs.current[index + 1].page.width,
-                            height: pageRefs.current[index + 1].page.height,
-                            dpi: 72
-                          })
-                        )
+                        const page = new PageClass({
+                          width: pageRefs.current[index + 1].page.width,
+                          height: pageRefs.current[index + 1].page.height,
+                          dpi: 72
+                        })
+                        return Point.fromCenter({x, y, page})
                       })
                     } />
                   }

@@ -5,24 +5,18 @@ export class Point {
     }
 
     /* Pass coordinates starting from the center of the document */
-    static fromCenter({ x, y, pageWidth, pageHeight}) {
+    static fromCenter({ x, y, page }) {
         return new Point({
-            top: pageHeight / 2 - y,
-            left: x + pageWidth / 2
+            top: (page.height / 2 - y * page.dpmm) / page.height,
+            left: (x * page.dpmm + page.width / 2) / page.width,
+            page
         })
     }
 
     toCenter () {
         return {
-            x: this.left - 600,
-            y: -this.top + 400
-        }
-    }
-
-    relativeToPage (page) {
-        return {
-            top: this.top / page.height,
-            left: this.left / page.width,
+            x: this.left - this.page.width / 2,
+            y: -this.top + this.page.height / 2
         }
     }
 }
@@ -38,6 +32,8 @@ export class Page {
 
 export class PointInPage {
     constructor (point, page) {
+        this.page = page;
+        this.point = point;
         this.left = point.left / page.width;
         this.top = point.top / page.height;
     }
