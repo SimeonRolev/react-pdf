@@ -46,3 +46,17 @@ export class Line {
         })
     }
 }
+
+export class Polygon {
+    constructor({ vertices, page }) {
+        this.vertices = vertices;
+        this.page = page;
+    }
+
+    static fromCenter({ vertices, page }) {
+        return new Polygon({
+            vertices: vertices.map(vertex => Point.fromCenter({ x: vertex[0], y: vertex[1], page })),
+            page
+        })
+    }
+}

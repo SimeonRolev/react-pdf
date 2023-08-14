@@ -1,8 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Page, Point, Line } from '../point';
+import { Page, Point, Line, Polygon } from '../point';
 import PointUI from './Point';
 import LineUI from './Line';
+import PolygonUI from './Polygon';
 
 
 function Overlay({ page, scale, annotations = {} }) {
@@ -17,6 +18,13 @@ function Overlay({ page, scale, annotations = {} }) {
         return Line.fromCenter({ p1: line[0], p2: line[1], page });
     })
 
+    const polygons = (annotations.polygons || []).map(polygon => {
+        return Polygon.fromCenter({
+            vertices: polygon,
+            page
+        })
+    })
+
     return (
         <div
             style={{
@@ -28,6 +36,7 @@ function Overlay({ page, scale, annotations = {} }) {
             }}
         >
             {lines.map((line, index) => <LineUI key={index} line={line} scale={scale} />)}
+            {polygons.map((polygon, index) => <PolygonUI key={index} polygon={polygon} />)}
             {points.map((point, index) => <PointUI key={index} point={point} />)}
         </div>
     )
