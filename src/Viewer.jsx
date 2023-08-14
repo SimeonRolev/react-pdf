@@ -16,7 +16,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-function Viewer({ fileName, points }) {
+function Viewer({ fileName, annotations }) {
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
   const [transition, setTransition] = useState(false);
@@ -196,7 +196,7 @@ function Viewer({ fileName, points }) {
         overflow: 'scroll',
       }}
     >
-      <div style={{ position: 'fixed', top: 0, zIndex: 9999 }}>
+      {/* <div style={{ position: 'fixed', top: 0, zIndex: 9999 }}>
         <button
           onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.ZOOM_IN.name ? Mode.NORMAL : Mode.ZOOM_IN) }}
           style={{ backgroundColor: mode.name === Mode.ZOOM_IN.name ? 'lightcyan' : undefined }}
@@ -209,7 +209,7 @@ function Viewer({ fileName, points }) {
           onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.PAN.name ? Mode.NORMAL : Mode.PAN) }}
           style={{ backgroundColor: mode.name === Mode.PAN.name ? 'lightcyan' : undefined }}
         >Pan</button>
-      </div>
+      </div> */}
 
       {/* TODO: Must get resized on scale changes */}
       <div
@@ -278,17 +278,16 @@ function Viewer({ fileName, points }) {
                     scale={scale}
                     pageNumber={page.pageNumber}
                   >
-                    <Overlay points={
-                      points.map(({ x, y }) => {
-                        return Point.fromCenter({
-                          x, y, page: new PageClass({
-                            width: page.width,
-                            height: page.height,
-                            dpi: 72
-                          })
-                        })
-                      })
-                    } />
+                    <Overlay
+                      page={new PageClass({
+                        width: page.width,
+                        height: page.height,
+                        /* TODO: Get the DPI from the XML */
+                        dpi: 72
+                      })}
+                      scale={scale}
+                      annotations={annotations[page.pageNumber]}
+                    />
                   </Page>
                 )
               })
@@ -303,7 +302,7 @@ function Viewer({ fileName, points }) {
 
 Viewer.propTypes = {
   fileName: PropTypes.string,
-  points: PropTypes.arrayOf(PropTypes.instanceOf(Point))
+  annotations: PropTypes.arrayOf(PropTypes.any),
 }
 
 export default Viewer

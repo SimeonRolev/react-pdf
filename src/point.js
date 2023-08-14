@@ -1,7 +1,8 @@
 export class Point {
-    constructor({ top, left }) {
+    constructor({ top, left, page }) {
         this.top = top;
         this.left = left;
+        this.page = page;
     }
 
     /* Pass coordinates starting from the center of the document */
@@ -27,5 +28,21 @@ export class Page {
         this.height = height;
         this.dpi = dpi;
         this.dpmm = dpi / 25.4;
+    }
+}
+
+export class Line {
+    constructor ({ p1, p2, page }) {
+        this.p1 = p1;
+        this.p2 = p2;
+        this.page = page;
+    }
+
+    static fromCenter({ p1, p2, page }) {
+        return new Line({
+            p1: Point.fromCenter({...p1, page}),
+            p2: Point.fromCenter({...p2, page}),
+            page
+        })
     }
 }
