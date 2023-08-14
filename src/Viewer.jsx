@@ -24,14 +24,10 @@ function Viewer({ fileName, points }) {
 
   const [loading, setLoading] = useState(true);
 
-  const panProps = usePan({
-    active: mode.name === Mode.PAN.name,
-    getNode: () => document.getElementById("available-space")
-  });
-
   const _initialWidth = React.useRef();
   const _initialHeight = React.useRef();
 
+  const wrapperRef = React.useRef(null);
   const pageRefs = React.useRef({});
   const documentRef = React.useRef();
   const pdfScale = React.useRef(1);
@@ -40,6 +36,11 @@ function Viewer({ fileName, points }) {
   const ghostRef = React.useRef();
   const scrollPosition = React.useRef([0, 0]);
   const wheeling = React.useRef(false);
+
+  const panProps = usePan({
+    active: mode.name === Mode.PAN.name,
+    getNode: () => wrapperRef.current
+  });
 
   function onDocumentLoadSuccess(pdfDoc) {
     Promise.all(
@@ -70,12 +71,8 @@ function Viewer({ fileName, points }) {
 
   }
 
-  const getArea = () => {
-    return document.getElementById("available-space")
-  }
-
   const zoomToCursor = React.useCallback((e, isUp = true) => {
-    const area = getArea()
+    const area = wrapperRef.current
     const { scrollHeight, scrollWidth } = area;
 
     const xPx = e.clientX + area.scrollLeft - area.offsetLeft
@@ -133,7 +130,7 @@ function Viewer({ fileName, points }) {
       Sometimes you'd get area indefined  
     */
     setTimeout(() => {
-      getArea().scrollTo(...scrollPosition.current)
+      wrapperRef.current.scrollTo(...scrollPosition.current)
     }, 200)
   }, [scale, ghostRef])
 
@@ -191,7 +188,7 @@ function Viewer({ fileName, points }) {
 
   return (
     <div
-      id="available-space"
+      ref={wrapperRef}
       style={{
         width: '100%',
         height: '100%',
