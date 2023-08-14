@@ -29,12 +29,3 @@ export class Page {
         this.dpmm = dpi / 25.4;
     }
 }
-
-export class PointInPage {
-    constructor (point, page) {
-        this.page = page;
-        this.point = point;
-        this.left = point.left / page.width;
-        this.top = point.top / page.height;
-    }
-}

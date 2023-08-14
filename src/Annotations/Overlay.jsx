@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { PointInPage } from '../point';
+import { Point } from '../point';
+import PointUI from './Point';
 
 
 function Overlay({
@@ -14,29 +15,13 @@ function Overlay({
             zIndex: 2
         }}
     >
-        { points.map((p, index) => {
-            return (
-                <div
-                    className='vcs-pdf-point'
-                    key={index} // TODO: p.id
-                    style={{
-                        position: 'absolute',
-                        top: p.top * 100 + '%',
-                        left: p.left * 100 + '%',
-                        border: '1px solid red',
-                        transform: 'translate(-5px, -5px)',
-                        width: 10,
-                        height: 10
-                    }}
-                />
-            )
-        }) }
+        { points.map((point, index) => <PointUI key={index} point={point} /> )}
     </div>
   )
 }
 
 Overlay.propTypes = {
-    points: PropTypes.arrayOf(PropTypes.instanceOf(PointInPage))
+    points: PropTypes.arrayOf(PropTypes.instanceOf(Point))
 }
 
 export default Overlay
