@@ -6,10 +6,8 @@ function Line({ line, scale }) {
     const ref = React.useRef();
 
     return (
-        <svg
-            viewBox={`0 0 ${line.page.width} ${line.page.height}`}
-            style={{ position: 'absolute', top: 0, left: 0 }}
-        >
+        <React.Fragment>
+
             <line
                 ref={ref}
                 x1={line.p1.left * 100 + '%'}
@@ -27,7 +25,7 @@ function Line({ line, scale }) {
                 onMouseEnter={() => { ref.current.style.stroke = "rgb(0, 255, 0)" }}
                 onMouseLeave={() => { ref.current.style.stroke = "rgb(255, 0, 0)" }}
             />
-        </svg>
+        </React.Fragment>
     )
 }
 

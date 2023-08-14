@@ -35,8 +35,13 @@ function Overlay({ page, scale, annotations = {} }) {
                 zIndex: 2
             }}
         >
-            {lines.map((line, index) => <LineUI key={index} line={line} scale={scale} />)}
-            {polygons.map((polygon, index) => <PolygonUI key={index} polygon={polygon} />)}
+            <svg
+                viewBox={`0 0 ${page.width} ${page.height}`}
+                style={{ position: 'absolute', top: 0, left: 0 }}
+            >
+                {lines.map((line, index) => <LineUI key={index} line={line} scale={scale} />)}
+                {polygons.map((polygon, index) => <PolygonUI key={index} polygon={polygon} />)}
+            </svg>
             {points.map((point, index) => <PointUI key={index} point={point} />)}
         </div>
     )
