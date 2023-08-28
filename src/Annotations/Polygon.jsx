@@ -14,7 +14,8 @@ function Polygon({ polygon }) {
                     .join(' ')
             }
             onMouseEnter={() => { ref.current.style.fill = "rgba(0, 255, 0, 0.2)" }}
-            onMouseLeave={() => { ref.current.style.fill = "rgba(255, 0, 0, 0.2)" }}
+            onMouseLeave={() => { ref.current.style.fill = "rgba(255, 0, 0, 0)" }}
+            style={{ fill: "rgba(255, 0, 0, 0)" }}
         ></polygon>
     )
 }
