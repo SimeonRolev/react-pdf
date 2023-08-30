@@ -16,7 +16,12 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-function Viewer({ fileName, annotations }) {
+function Viewer({
+  fileName,
+  annotations,
+  onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
+  onCurrentPageChange
+}) {
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
   const [transition, setTransition] = useState(false);
@@ -67,6 +72,7 @@ function Viewer({ fileName, annotations }) {
       ghostRef.current.style.height = height + 'px';
 
       setLoading(false)
+      onDocumentLoadSuccessCallback(pdfDoc)
     })
 
   }
@@ -186,6 +192,29 @@ function Viewer({ fileName, annotations }) {
     }
   }, [_initialHeight, _initialWidth, scale, mode.name, zoomToCursor, rescalePDF])
 
+  const observePageNumber = () => {
+    const nodes = Object.values(pageRefs.current).map(p => p._domNode)
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        entry.target.setAttribute('data-intersecting', entry.isIntersecting);
+      })
+
+      onCurrentPageChange(
+        Math.min(
+          ...nodes
+            .filter(node => node.getAttribute('data-intersecting') === 'true')
+            .map(node => parseInt(node.getAttribute('data-page-number')))
+        )
+      )
+    }, {
+      root: wrapperRef.current,
+      threshold: 0
+    })
+
+    /* TODO: Unobserve? */
+    nodes.forEach(node => observer.observe(node))
+  }
+
   return (
     <div
       ref={wrapperRef}
@@ -193,25 +222,9 @@ function Viewer({ fileName, annotations }) {
         width: '100%',
         height: '100%',
         display: 'flex',
-        overflow: 'scroll',
+        overflow: 'scroll'
       }}
     >
-      {/* <div style={{ position: 'fixed', top: 0, zIndex: 9999 }}>
-        <button
-          onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.ZOOM_IN.name ? Mode.NORMAL : Mode.ZOOM_IN) }}
-          style={{ backgroundColor: mode.name === Mode.ZOOM_IN.name ? 'lightcyan' : undefined }}
-        >Zoom in</button>
-        <button
-          onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.ZOOM_OUT.name ? Mode.NORMAL : Mode.ZOOM_OUT) }}
-          style={{ backgroundColor: mode.name === Mode.ZOOM_OUT.name ? 'lightcyan' : undefined }}
-        >Zoom out</button>
-        <button
-          onClick={(e) => { e.stopPropagation(); setMode(mode.name === Mode.PAN.name ? Mode.NORMAL : Mode.PAN) }}
-          style={{ backgroundColor: mode.name === Mode.PAN.name ? 'lightcyan' : undefined }}
-        >Pan</button>
-      </div> */}
-
-      {/* TODO: Must get resized on scale changes */}
       <div
         id='canvas'
         ref={canvasRef}
@@ -277,6 +290,13 @@ function Viewer({ fileName, annotations }) {
                     key={page.pageNumber}
                     scale={scale}
                     pageNumber={page.pageNumber}
+                    inputRef={ref => {
+                      if (!ref) return;
+                      page._domNode = ref;
+                      if (Object.values(pageRefs.current).every(p => !!p._domNode)) {
+                        observePageNumber()
+                      }
+                    }}
                   >
                     <Overlay
                       page={new PageClass({
@@ -300,9 +320,16 @@ function Viewer({ fileName, annotations }) {
   )
 }
 
+Viewer.defaultProps = {
+  onDocumentLoadSuccess: () => { },
+  onCurrentPageChange: () => { },
+}
+
 Viewer.propTypes = {
   fileName: PropTypes.string,
   annotations: PropTypes.arrayOf(PropTypes.any),
+  onDocumentLoadSuccess: PropTypes.func,
+  onCurrentPageChange: PropTypes.func
 }
 
 export default Viewer
