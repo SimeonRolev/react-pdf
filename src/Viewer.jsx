@@ -26,6 +26,7 @@ function Viewer({
   const [scale, setScale] = useState(1);
   const [transition, setTransition] = useState(false);
   const [mode, setMode] = useState(Mode.NORMAL);
+  const [observePages, setObservePages] = useState(false);
 
   const [loading, setLoading] = useState(true);
 
@@ -192,7 +193,7 @@ function Viewer({
     }
   }, [_initialHeight, _initialWidth, scale, mode.name, zoomToCursor, rescalePDF])
 
-  const observePageNumber = () => {
+  React.useEffect(() => {
     const nodes = Object.values(pageRefs.current).map(p => p._domNode)
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -211,9 +212,11 @@ function Viewer({
       threshold: 0
     })
 
-    /* TODO: Unobserve? */
     nodes.forEach(node => observer.observe(node))
-  }
+    return () => {
+      observer.disconnect()
+    }
+  }, [observePages, onCurrentPageChange])
 
   return (
     <div
@@ -291,11 +294,9 @@ function Viewer({
                     scale={scale}
                     pageNumber={page.pageNumber}
                     inputRef={ref => {
-                      if (!ref) return;
+                      if (!ref || ref.isEqualNode(page._domNode)) return;
                       page._domNode = ref;
-                      if (Object.values(pageRefs.current).every(p => !!p._domNode)) {
-                        observePageNumber()
-                      }
+                      setObservePages(Object.values(pageRefs.current).every(p => !!p._domNode))
                     }}
                   >
                     <Overlay

@@ -32,9 +32,9 @@ function App() {
     setNumPages(document.numPages)
   }
 
-  const onCurrentPageChange = (page) => {
+  const onCurrentPageChange = React.useCallback((page) => {
     setPageNumber(page);
-  }
+  }, [])
 
   return (
     <div
