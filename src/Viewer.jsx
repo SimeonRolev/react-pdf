@@ -7,7 +7,7 @@ import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { detectMouseWheelDirection, isScaleValid } from './util';
 import { Mode, ZOOM_STEP } from "./constants"
-import { usePan } from './Pan';
+import { usePan, usePanOnSpace } from './Pan';
 import Overlay from './Annotations/Overlay';
 import { Page as PageClass } from './point';
 
@@ -50,32 +50,8 @@ function Viewer({
     getNode: () => wrapperRef.current
   });
 
-  React.useEffect(() => {
-    const disposers = [];
-
-    const onSpaceDown = e => {
-      if (e.code === 'Space') {
-        e.preventDefault()
-        setMode(Mode.PAN) 
-      }
-    }
-    const onSpaceUp = e => {
-      if (e.code === 'Space') {
-        e.preventDefault()
-        setMode(Mode.NORMAL)
-      }
-    }
-
-    document.body.addEventListener('keydown', onSpaceDown)
-    document.body.addEventListener('keyup', onSpaceUp)
-    disposers.push(() => document.body.removeEventListener('keydown', onSpaceDown))
-    disposers.push(() => document.body.removeEventListener('keyup', onSpaceUp))
-
-    return () => {
-      disposers.forEach(d => d())
-      disposers.length = 0;
-    }
-  }, [])
+  usePanOnSpace({ setMode })
+  // usePanOnMouse3({ setMode, panProps })
 
   function onDocumentLoadSuccess(pdfDoc) {
     Promise.all(
