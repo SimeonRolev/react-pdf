@@ -1,5 +1,6 @@
 import React from 'react'
 import Viewer from './Viewer'
+import PageNumberInput from './Components/PageNumberInput';
 
 /*
 In page 2:
@@ -85,13 +86,12 @@ function App() {
       />
       <div
         id='toolbar'
-        style={{ 
+        style={{
           position: 'fixed',
           bottom: 15,
           width: '100%',
           display: 'flex',
           justifyContent: 'center',
-          
         }}
       >
         <div style={{
@@ -100,7 +100,11 @@ function App() {
           borderRadius: 4,
         }}>
           <button onClick={() => scrollToPage(pageNumber - 1)}>-</button>
-          <span>{pageNumber}</span> / <span>{numPages}</span> 
+          <PageNumberInput
+            initialValue={pageNumber}
+            max={numPages}
+            onSubmit={scrollToPage}
+          /> / <span>{numPages}</span>
           <button onClick={() => scrollToPage(pageNumber + 1)}>+</button>
         </div>
       </div>
