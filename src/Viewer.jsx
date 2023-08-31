@@ -21,6 +21,7 @@ function Viewer({
   annotations,
   onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
   onCurrentPageChange,
+  onScaleChange,
   viewerRef
 }) {
   /* This is a temp zoom level while zooming with the scroll wheel */
@@ -48,6 +49,33 @@ function Viewer({
     active: mode.name === Mode.PAN.name,
     getNode: () => wrapperRef.current
   });
+
+  React.useEffect(() => {
+    const disposers = [];
+
+    const onSpaceDown = e => {
+      if (e.code === 'Space') {
+        e.preventDefault()
+        setMode(Mode.PAN) 
+      }
+    }
+    const onSpaceUp = e => {
+      if (e.code === 'Space') {
+        e.preventDefault()
+        setMode(Mode.NORMAL)
+      }
+    }
+
+    document.body.addEventListener('keydown', onSpaceDown)
+    document.body.addEventListener('keyup', onSpaceUp)
+    disposers.push(() => document.body.removeEventListener('keydown', onSpaceDown))
+    disposers.push(() => document.body.removeEventListener('keyup', onSpaceUp))
+
+    return () => {
+      disposers.forEach(d => d())
+      disposers.length = 0;
+    }
+  }, [])
 
   function onDocumentLoadSuccess(pdfDoc) {
     Promise.all(
@@ -129,6 +157,7 @@ function Viewer({
     rescaledRef.current.style.height = canvasRef.current.style.height;
     ghostRef.current.style.transform = `scale(${resultScale})`
     setScale(resultScale)
+    onScaleChange(resultScale)
     setTransition(true)
     setTimeout(() => {
       setTransition(false)
@@ -140,7 +169,7 @@ function Viewer({
     setTimeout(() => {
       wrapperRef.current.scrollTo(...scrollPosition.current)
     }, 200)
-  }, [scale, ghostRef])
+  }, [scale, ghostRef, onScaleChange])
 
   const modeHandlers = {
     onClick: {
@@ -225,11 +254,10 @@ function Viewer({
     })
   }
 
-  React.useEffect(() => {
-    viewerRef.current = {
-      scrollToPage
-    }
-  }, [viewerRef])
+  viewerRef.current = {
+    scrollToPage,
+    setMode
+  }
 
   return (
     <div
@@ -344,6 +372,7 @@ Viewer.propTypes = {
   annotations: PropTypes.arrayOf(PropTypes.any),
   onDocumentLoadSuccess: PropTypes.func,
   onCurrentPageChange: PropTypes.func,
+  onScaleChange: PropTypes.func,
   viewerRef: PropTypes.object
 }
 

@@ -1,46 +1,79 @@
 import React from 'react'
 import Viewer from './Viewer'
 import PageNumberInput from './Components/PageNumberInput';
+import { Mode } from './constants';
 
-/*
-In page 2:
-<Poly>
-<Vertex>
-<x>-437.885417</x>
-<y>316.685986</y>
-</Vertex>
-<Vertex>
-<x>361.950000</x>
-<y>316.685986</y>
-</Vertex>
-<Vertex>
-<x>361.950000</x>
-<y>-254.814014</y>
-</Vertex>
-<Vertex>
-<x>-437.885417</x>
-<y>-254.814014</y>
-</Vertex>
-</Poly>
- */
+const annotations = {
+  1: {
+    points: [
+      { x: 0, y: 0 },
+      { x: -430.544941, y: 79.545809 },
+    ],
+    lines: [
+      [
+        { x: 0, y: 0 },
+        { x: -430.544941, y: 79.545809 },
+      ]
+    ]
+  },
+  2: {
+    polygons: [
+      [
+        [-437.885417, 316.685986],
+        [361.950000, 316.685986],
+        [361.950000, -254.814014],
+        [-437.885417, -254.814014]
+      ],
+      [
+        [-174, 119],
+        [174, 200],
+        [200, -200],
+      ]
+    ]
+  }
+}
 
 
 function App() {
   const viewerRef = React.useRef({})
   const [pageNumber, setPageNumber] = React.useState(1);
   const [numPages, setNumPages] = React.useState(undefined);
+  const [pan, setPan] = React.useState(false);
+  const [scale, setScale] = React.useState(1);
 
-  const onDocumentLoadSuccess = (document) => {
+  const onDocumentLoadSuccess = React.useCallback((document) => {
     setNumPages(document.numPages)
-  }
+  }, [])
 
   const onCurrentPageChange = React.useCallback((page) => {
     setPageNumber(page);
   }, [])
 
+  const onScaleChange = React.useCallback((scale) => {
+    setScale(scale)
+  }, [])
+
+  const zoomIn = React.useCallback(() => {
+    viewerRef.current.setMode(Mode.ZOOM_IN)
+  }, [])
+
+  const zoomOut = React.useCallback(() => {
+    viewerRef.current.setMode(Mode.ZOOM_OUT)
+  }, [])
+
   const scrollToPage = (n) => {
     if (n > 0 && n <= numPages) {
       viewerRef.current.scrollToPage(n)
+    }
+  }
+
+  const togglePanMode = () => {
+    if (!pan) {
+      viewerRef.current.setMode(Mode.PAN);
+      setPan(true)
+    } else {
+      viewerRef.current.setMode(Mode.NORMAL)
+      setPan(false)
     }
   }
 
@@ -54,35 +87,8 @@ function App() {
         onDocumentLoadSuccess={onDocumentLoadSuccess}
         fileName={'Public Library Sample.pdf'}
         onCurrentPageChange={onCurrentPageChange}
-        annotations={{
-          1: {
-            points: [
-              { x: 0, y: 0 },
-              { x: -430.544941, y: 79.545809 },
-            ],
-            lines: [
-              [
-                { x: 0, y: 0 },
-                { x: -430.544941, y: 79.545809 },
-              ]
-            ]
-          },
-          2: {
-            polygons: [
-              [
-                [-437.885417, 316.685986],
-                [361.950000, 316.685986],
-                [361.950000, -254.814014],
-                [-437.885417, -254.814014]
-              ],
-              [
-                [-174, 119],
-                [174, 200],
-                [200, -200],
-              ]
-            ]
-          }
-        }}
+        onScaleChange={onScaleChange}
+        annotations={annotations}
       />
       <div
         id='toolbar'
@@ -99,13 +105,19 @@ function App() {
           padding: 20,
           borderRadius: 4,
         }}>
-          <button onClick={() => scrollToPage(pageNumber - 1)}>-</button>
+          Zoom:
+          <button onClick={zoomOut}>-</button>
+          <span>{parseInt(scale * 100) + '%'}</span>
+          <button onClick={zoomIn}>+</button>
+
+          <button onClick={() => scrollToPage(pageNumber - 1)}>Prev</button>
           <PageNumberInput
             initialValue={pageNumber}
             max={numPages}
             onSubmit={scrollToPage}
           /> / <span>{numPages}</span>
-          <button onClick={() => scrollToPage(pageNumber + 1)}>+</button>
+          <button onClick={() => scrollToPage(pageNumber + 1)}>Next</button>
+          <button onClick={togglePanMode}>Pan</button>
         </div>
       </div>
     </div>
