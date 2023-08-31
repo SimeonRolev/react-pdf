@@ -9,7 +9,7 @@ import { detectMouseWheelDirection, isScaleValid } from './util';
 import { Mode, ZOOM_STEP } from "./constants"
 import { usePan } from './Pan';
 import Overlay from './Annotations/Overlay';
-import { Point, Page as PageClass } from './point';
+import { Page as PageClass } from './point';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
@@ -20,7 +20,8 @@ function Viewer({
   fileName,
   annotations,
   onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
-  onCurrentPageChange
+  onCurrentPageChange,
+  viewerRef
 }) {
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
@@ -208,8 +209,7 @@ function Viewer({
         )
       )
     }, {
-      root: wrapperRef.current,
-      threshold: 0
+      root: wrapperRef.current
     })
 
     nodes.forEach(node => observer.observe(node))
@@ -217,6 +217,19 @@ function Viewer({
       observer.disconnect()
     }
   }, [observePages, onCurrentPageChange])
+
+  const scrollToPage = (n) => {
+    wrapperRef.current.scrollTo({
+      top: pageRefs.current[n]._domNode.offsetTop + 1,
+      behavior: 'smooth'
+    })
+  }
+
+  React.useEffect(() => {
+    viewerRef.current = {
+      scrollToPage
+    }
+  }, [viewerRef])
 
   return (
     <div
@@ -330,7 +343,8 @@ Viewer.propTypes = {
   fileName: PropTypes.string,
   annotations: PropTypes.arrayOf(PropTypes.any),
   onDocumentLoadSuccess: PropTypes.func,
-  onCurrentPageChange: PropTypes.func
+  onCurrentPageChange: PropTypes.func,
+  viewerRef: PropTypes.object
 }
 
 export default Viewer

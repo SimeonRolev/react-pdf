@@ -25,6 +25,7 @@ In page 2:
 
 
 function App() {
+  const viewerRef = React.useRef({})
   const [pageNumber, setPageNumber] = React.useState(1);
   const [numPages, setNumPages] = React.useState(undefined);
 
@@ -36,12 +37,19 @@ function App() {
     setPageNumber(page);
   }, [])
 
+  const scrollToPage = (n) => {
+    if (n > 0 && n <= numPages) {
+      viewerRef.current.scrollToPage(n)
+    }
+  }
+
   return (
     <div
       id='playground'
       style={{ marginTop: 100, height: '80%' }}
     >
       <Viewer
+        viewerRef={viewerRef}
         onDocumentLoadSuccess={onDocumentLoadSuccess}
         fileName={'Public Library Sample.pdf'}
         onCurrentPageChange={onCurrentPageChange}
@@ -91,7 +99,9 @@ function App() {
           padding: 20,
           borderRadius: 4,
         }}>
+          <button onClick={() => scrollToPage(pageNumber - 1)}>-</button>
           <span>{pageNumber}</span> / <span>{numPages}</span> 
+          <button onClick={() => scrollToPage(pageNumber + 1)}>+</button>
         </div>
       </div>
     </div>
