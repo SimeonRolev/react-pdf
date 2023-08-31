@@ -15,6 +15,7 @@ function PageNumberInput({ initialValue, numPages, onSubmit, ...rest }) {
             max={numPages}
             onChange={e => setPageNumberInput(parseInt(e.target.value))}
             onKeyUp={e => e.key === "Enter" && onSubmit(pageNumberInput)}
+            onBlur={() => onSubmit(pageNumberInput)}
             value={pageNumberInput}
             {...rest}
         />
