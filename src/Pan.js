@@ -4,7 +4,7 @@ import { Mode } from './constants';
 /* TODO: Attach the events to the viewer not the docment */
 /* TODO: Fix pan, zoom in, pan mode clicking bug */
 
-export function usePanOnSpace ({ setMode }) {
+export function usePanOnSpace({ setMode }) {
     React.useEffect(() => {
         const disposers = [];
 
@@ -34,10 +34,10 @@ export function usePanOnSpace ({ setMode }) {
             disposers.forEach((d) => d());
             disposers.length = 0;
         };
-    }, [setMode])
+    }, [setMode]);
 }
 
-export function usePan({ active, getNode }) {
+export function usePan({ getNode }) {
     const [dragging, setDragging] = React.useState(false);
     const initialCoordinates = React.useRef({ x: 0, y: 0 });
     const node = React.useRef(null);
@@ -73,14 +73,10 @@ export function usePan({ active, getNode }) {
         setDragging(false);
     };
 
-    return active
-        ? {
-              onClick: () => {},
-              onMouseDown: onMouseDown,
-              onMouseMove: onMouseMove,
-              onMouseUp: onMouseUp,
-              onMouseLeave: onMouseLeave
-          }
-        : {
-        };
+    return {
+        onMouseDown: onMouseDown,
+        onMouseMove: onMouseMove,
+        onMouseUp: onMouseUp,
+        onMouseLeave: onMouseLeave,
+    };
 }

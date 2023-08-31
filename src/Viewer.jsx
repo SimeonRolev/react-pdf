@@ -46,7 +46,6 @@ function Viewer({
   const wheeling = React.useRef(false);
 
   const panProps = usePan({
-    active: mode.name === Mode.PAN.name,
     getNode: () => wrapperRef.current
   });
 
@@ -147,24 +146,6 @@ function Viewer({
     }, 200)
   }, [scale, ghostRef, onScaleChange])
 
-  const modeHandlers = {
-    onClick: {
-      [Mode.NORMAL.name]: () => { },
-      [Mode.ZOOM_IN.name]: (e) => {
-        zoomToCursor(e, true)
-        rescalePDF()
-      },
-      [Mode.ZOOM_OUT.name]: (e) => {
-        zoomToCursor(e, false)
-        rescalePDF()
-      }
-    }
-  }
-
-  const onClick = (e) => {
-    modeHandlers.onClick[mode.name](e)
-  }
-
   /* 
     https://github.com/wojtekmaj/react-pdf/issues/493
   */
@@ -235,6 +216,44 @@ function Viewer({
     setMode
   }
 
+  const modeHandlers = {
+    [Mode.NORMAL.name]: {
+      onMouseDown: e => {
+        if (e.nativeEvent.which == 2 ) {
+          panProps.onMouseDown(e)
+        }
+      },
+      onMouseMove: e => {
+        if (e.nativeEvent.which == 2 ) {
+          panProps.onMouseMove(e)
+        }
+      },
+      onMouseUp: e => {
+        if (e.nativeEvent.which == 2 ) {
+          panProps.onMouseUp(e)
+        }
+      },
+      onMouseLeave: e => {
+        if (e.nativeEvent.which == 2 ) {
+          panProps.onMouseLeave(e)
+        }
+      },
+    },
+    [Mode.PAN.name]: panProps,
+    [Mode.ZOOM_IN.name]: {
+      onClick: (e) => {
+        zoomToCursor(e, true)
+        rescalePDF()
+      }
+    },
+    [Mode.ZOOM_OUT.name]: {
+      onClick: (e) => {
+        zoomToCursor(e, false)
+        rescalePDF()
+      }
+    }
+  }
+
   return (
     <div
       ref={wrapperRef}
@@ -295,8 +314,11 @@ function Viewer({
             opacity: transition ? 0 : 1,
             cursor: panProps.dragging ? 'grabbing' : mode.cursor
           }}
-          onClick={onClick}
-          {...panProps}
+          onClick={modeHandlers[mode.name].onClick}
+          onMouseDown={modeHandlers[mode.name].onMouseDown}
+          onMouseMove={modeHandlers[mode.name].onMouseMove}
+          onMouseUp={modeHandlers[mode.name].onMouseUp}
+          onMouseLeave={modeHandlers[mode.name].onMouseLeave}
         >
           <Document
             inputRef={documentRef}
