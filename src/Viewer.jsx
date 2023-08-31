@@ -50,7 +50,6 @@ function Viewer({
   });
 
   usePanOnSpace({ setMode })
-  // usePanOnMouse3({ setMode, panProps })
 
   function onDocumentLoadSuccess(pdfDoc) {
     Promise.all(
@@ -215,30 +214,20 @@ function Viewer({
     scrollToPage,
     setMode
   }
+  
+  const handleEvent = handlerName => e => {
+    if (
+      e.nativeEvent.which === 2 &&
+      Object.keys(panProps).includes(handlerName)
+    ) {
+      panProps[handlerName](e)
+    } else {
+      (eventHandlers[mode.name][handlerName] ?? (() => {}))(e)
+    }
+  }
 
-  const modeHandlers = {
-    [Mode.NORMAL.name]: {
-      onMouseDown: e => {
-        if (e.nativeEvent.which == 2 ) {
-          panProps.onMouseDown(e)
-        }
-      },
-      onMouseMove: e => {
-        if (e.nativeEvent.which == 2 ) {
-          panProps.onMouseMove(e)
-        }
-      },
-      onMouseUp: e => {
-        if (e.nativeEvent.which == 2 ) {
-          panProps.onMouseUp(e)
-        }
-      },
-      onMouseLeave: e => {
-        if (e.nativeEvent.which == 2 ) {
-          panProps.onMouseLeave(e)
-        }
-      },
-    },
+  const eventHandlers = {
+    [Mode.NORMAL.name]: {},
     [Mode.PAN.name]: panProps,
     [Mode.ZOOM_IN.name]: {
       onClick: (e) => {
@@ -314,11 +303,11 @@ function Viewer({
             opacity: transition ? 0 : 1,
             cursor: panProps.dragging ? 'grabbing' : mode.cursor
           }}
-          onClick={modeHandlers[mode.name].onClick}
-          onMouseDown={modeHandlers[mode.name].onMouseDown}
-          onMouseMove={modeHandlers[mode.name].onMouseMove}
-          onMouseUp={modeHandlers[mode.name].onMouseUp}
-          onMouseLeave={modeHandlers[mode.name].onMouseLeave}
+          onClick={handleEvent('onClick')}
+          onMouseDown={handleEvent('onMouseDown')}
+          onMouseMove={handleEvent('onMouseMove')}
+          onMouseUp={handleEvent('onMouseUp')}
+          onMouseLeave={handleEvent('onMouseLeave')}
         >
           <Document
             inputRef={documentRef}
