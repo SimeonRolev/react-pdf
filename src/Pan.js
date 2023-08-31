@@ -38,8 +38,5 @@ export function usePan ({ active, getNode }) {
         onMouseMove: onMouseMove,
         onMouseUp: onMouseUp,
         onMouseLeave: onMouseLeave,
-        style: {
-            cursor: dragging ? 'grabbing' : 'grab'
-        }
     } : {}
 }

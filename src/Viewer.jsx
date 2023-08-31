@@ -316,8 +316,8 @@ function Viewer({
           style={{
             transform: 'scale(1)', // is being set in the React.useEffect()
             transformOrigin: '0 0',
-            cursor: mode.cursor,
-            opacity: transition ? 0 : 1
+            opacity: transition ? 0 : 1,
+            cursor: panProps.dragging ? 'grabbing' : mode.cursor
           }}
           onClick={onClick}
           {...panProps}
