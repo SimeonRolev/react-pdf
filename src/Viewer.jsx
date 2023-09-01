@@ -212,7 +212,8 @@ function Viewer({
 
   viewerRef.current = {
     scrollToPage,
-    setMode
+    setMode,
+    mode
   }
   
   const handleEvent = handlerName => e => {

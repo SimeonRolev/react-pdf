@@ -68,7 +68,7 @@ function App() {
   }
 
   const togglePanMode = () => {
-    if (!pan) {
+    if (viewerRef.current.mode !== Mode.PAN) {
       viewerRef.current.setMode(Mode.PAN);
       setPan(true)
     } else {
@@ -84,8 +84,8 @@ function App() {
     >
       <Viewer
         viewerRef={viewerRef}
-        onDocumentLoadSuccess={onDocumentLoadSuccess}
         fileName={'Public Library Sample.pdf'}
+        onDocumentLoadSuccess={onDocumentLoadSuccess}
         onCurrentPageChange={onCurrentPageChange}
         onScaleChange={onScaleChange}
         annotations={annotations}
