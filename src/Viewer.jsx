@@ -30,6 +30,7 @@ function Viewer({
   const [transition, setTransition] = useState(false);
   const [mode, setMode] = useState(Mode.NORMAL);
   const [observePages, setObservePages] = useState(false);
+  const [numPages, setNumPages] = useState();
 
   const [loading, setLoading] = useState(true);
 
@@ -51,6 +52,8 @@ function Viewer({
   usePanOnSpace({ setMode })
 
   function onDocumentLoadSuccess(pdfDoc) {
+    setNumPages(pdfDoc.numPages)
+
     Promise.all(
       [...new Array(pdfDoc.numPages)]
         .map((_, index) => pdfDoc.getPage(index + 1))
@@ -182,13 +185,15 @@ function Viewer({
         entry.target.setAttribute('data-intersecting', entry.isIntersecting);
       })
 
-      onCurrentPageChange(
-        Math.min(
-          ...nodes
-            .filter(node => node.getAttribute('data-intersecting') === 'true')
-            .map(node => parseInt(node.getAttribute('data-page-number')))
-        )
+      const pageNumber = Math.min(
+        ...nodes
+          .filter(node => node.getAttribute('data-intersecting') === 'true')
+          .map(node => parseInt(node.getAttribute('data-page-number')))
       )
+
+      if (pageNumber > 0 && pageNumber <= numPages) {
+        onCurrentPageChange(pageNumber)
+      }
     }, {
       root: wrapperRef.current
     })
@@ -197,7 +202,7 @@ function Viewer({
     return () => {
       observer.disconnect()
     }
-  }, [observePages, onCurrentPageChange])
+  }, [numPages, observePages, onCurrentPageChange])
 
   const scrollToPage = (n) => {
     wrapperRef.current.scrollTo({
@@ -218,7 +223,7 @@ function Viewer({
     ) {
       panProps[handlerName](e)
     } else {
-      (eventHandlers[mode.name][handlerName] ?? (() => {}))(e)
+      (eventHandlers[mode.name][handlerName] ?? (() => { }))(e)
     }
   }
 
