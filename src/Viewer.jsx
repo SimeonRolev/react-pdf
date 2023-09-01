@@ -10,6 +10,7 @@ import { Mode, ZOOM_STEP } from "./constants"
 import { usePan, usePanOnSpace } from './Pan';
 import Overlay from './Annotations/Overlay';
 import { Page as PageClass } from './point';
+import Ghost from './Ghost';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
@@ -37,11 +38,9 @@ function Viewer({
 
   const wrapperRef = React.useRef(null);
   const pageRefs = React.useRef({});
-  const documentRef = React.useRef();
   const pdfScale = React.useRef(1);
   const canvasRef = React.useRef();
   const rescaledRef = React.useRef();
-  const ghostRef = React.useRef();
   const scrollPosition = React.useRef([0, 0]);
   const wheeling = React.useRef(false);
 
@@ -72,8 +71,6 @@ function Viewer({
 
       rescaledRef.current.style.width = width + 'px';
       rescaledRef.current.style.height = height + 'px';
-      ghostRef.current.style.width = width + 'px';
-      ghostRef.current.style.height = height + 'px';
 
       setLoading(false)
       onDocumentLoadSuccessCallback(pdfDoc)
@@ -129,7 +126,6 @@ function Viewer({
     rescaledRef.current.style.transform = `scale(1)`
     rescaledRef.current.style.width = canvasRef.current.style.width;
     rescaledRef.current.style.height = canvasRef.current.style.height;
-    ghostRef.current.style.transform = `scale(${resultScale})`
     setScale(resultScale)
     onScaleChange(resultScale)
     setTransition(true)
@@ -143,7 +139,7 @@ function Viewer({
     setTimeout(() => {
       wrapperRef.current.scrollTo(...scrollPosition.current)
     }, 200)
-  }, [scale, ghostRef, onScaleChange])
+  }, [scale, onScaleChange])
 
   /* 
     https://github.com/wojtekmaj/react-pdf/issues/493
@@ -215,7 +211,6 @@ function Viewer({
     setMode,
     mode
   }
-  
   const handleEvent = handlerName => e => {
     if (
       e.nativeEvent.which === 2 &&
@@ -262,39 +257,11 @@ function Viewer({
           position: 'relative'
         }}
       >
-        <div
-          id='rescaled-ghost'
-          ref={ghostRef}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            transform: 'scale(1)', // is being set in the React.useEffect()
-            transformOrigin: '0 0',
-            cursor: mode.cursor,
-            opacity: transition ? 1 : 0,
-            display: transition ? 'block' : "none",
-            filter: "blur(1px)"
-          }}
-          key={42}
-        >
-          <Document
-            key={42}
-            file={fileName}
-          >
-            {(
-              Object.values(pageRefs.current).map(page => {
-                return (
-                  <Page
-                    key={page.pageNumber}
-                    scale={1}
-                    pageNumber={page.pageNumber}
-                  >
-                  </Page>
-                )
-              })
-            )}
-          </Document>
-        </div>
+        <Ghost
+          fileName={fileName}
+          scale={scale}
+          isVisible={!!transition}
+        />
         <div
           id='rescaled'
           ref={rescaledRef}
@@ -311,7 +278,6 @@ function Viewer({
           onMouseLeave={handleEvent('onMouseLeave')}
         >
           <Document
-            inputRef={documentRef}
             file={fileName}
             onLoadSuccess={onDocumentLoadSuccess}
           >
