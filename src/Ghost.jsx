@@ -14,6 +14,8 @@ function Ghost({ fileName, scale, isVisible }) {
     <div
       ref={ref}
       style={{
+        position: 'absolute',
+        inset: 0,
         transform: `scale(${scale})`,
         transformOrigin: '0 0',
         opacity: isVisible ? 1 : 0,
