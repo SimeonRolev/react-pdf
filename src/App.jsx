@@ -38,7 +38,6 @@ function App() {
   const viewerRef = React.useRef({})
   const [pageNumber, setPageNumber] = React.useState(1);
   const [numPages, setNumPages] = React.useState(undefined);
-  const [pan, setPan] = React.useState(false);
   const [scale, setScale] = React.useState(1);
 
   const onDocumentLoadSuccess = React.useCallback((document) => {
@@ -70,10 +69,8 @@ function App() {
   const togglePanMode = () => {
     if (viewerRef.current.mode !== Mode.PAN) {
       viewerRef.current.setMode(Mode.PAN);
-      setPan(true)
     } else {
       viewerRef.current.setMode(Mode.NORMAL)
-      setPan(false)
     }
   }
 
