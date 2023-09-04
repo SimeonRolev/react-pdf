@@ -5,7 +5,7 @@ import { Document, Page } from 'react-pdf';
 import { pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
-import { detectMouseWheelDirection, isScaleValid } from './util';
+import { detectMouseWheelDirection } from './util';
 import { Mode, ZOOM_STEP } from "./constants"
 import { usePan, usePanOnSpace } from './Pan';
 import Overlay from './Annotations/Overlay';
@@ -27,6 +27,7 @@ function Viewer({
 }) {
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
+  const [scaleLimit, setScaleLimit] = useState(10);
   const [transition, setTransition] = useState(false);
   const [mode, setMode] = useState(Mode.NORMAL);
   const [observePages, setObservePages] = useState(false);
@@ -51,6 +52,10 @@ function Viewer({
 
   usePanOnSpace({ setMode })
 
+  const isScaleValid = React.useCallback((input) => {
+    return input > 0.25 && input < scaleLimit
+  }, [scaleLimit])
+
   function onDocumentLoadSuccess(pdfDoc) {
     setNumPages(pdfDoc.numPages)
 
@@ -74,6 +79,10 @@ function Viewer({
 
       rescaledRef.current.style.width = width + 'px';
       rescaledRef.current.style.height = height + 'px';
+
+      const biggestPage = Math.max(...pages.map(p => p.width * p.height))
+      const MAX_CANVAS_SIZE = 200000000
+      setScaleLimit(Math.sqrt(MAX_CANVAS_SIZE / biggestPage));
 
       setLoading(false)
       onDocumentLoadSuccessCallback(pdfDoc)
@@ -113,7 +122,7 @@ function Viewer({
     ]
 
     area.scrollTo(...scrollPosition.current)
-  }, [scale])
+  }, [isScaleValid, scale])
 
   const rescalePDF = React.useCallback(() => {
     const resultScale = scale * pdfScale.current
@@ -302,9 +311,7 @@ function Viewer({
                     <Overlay
                       page={new PageClass({
                         width: page.width,
-                        height: page.height,
-                        /* TODO: Get the DPI from the XML */
-                        dpi: 72
+                        height: page.height
                       })}
                       scale={scale}
                       annotations={annotations[page.pageNumber]}

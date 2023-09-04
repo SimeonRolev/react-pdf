@@ -23,9 +23,10 @@ export class Point {
 }
 
 export class Page {
-    constructor ({ width, height, dpi }) {
+    constructor ({ width, height, dpi = 72 }) {
         this.width = width;
         this.height = height;
+        /* TODO: Get the DPI from the XML */
         this.dpi = dpi;
         this.dpmm = dpi / 25.4;
     }
