@@ -151,7 +151,7 @@ function Viewer({
     setTimeout(() => {
       wrapperRef.current.scrollTo(...scrollPosition.current)
     }, 200)
-  }, [scale, onScaleChange])
+  }, [scale, isScaleValid, onScaleChange])
 
   /* 
     https://github.com/wojtekmaj/react-pdf/issues/493
