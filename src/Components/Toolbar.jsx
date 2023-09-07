@@ -21,7 +21,7 @@ const S = {
     `
 };
 
-function Toolbar({ prevPage, nextPage }) {
+function Toolbar({ prevPage, nextPage, scale, togglePanMode }) {
     return (
         <S.Toolbar>
             <IconButton onClick={prevPage}>
@@ -31,6 +31,13 @@ function Toolbar({ prevPage, nextPage }) {
                 <Icon icon='right-arrow' />
             </IconButton>
             <S.Separator />
+            { parseInt(scale * 100) + '%' }
+
+            <S.Separator />
+
+            <IconButton onClick={togglePanMode}>
+                <Icon icon='hand' />
+            </IconButton>
         </S.Toolbar>
     )
 }
@@ -39,6 +46,8 @@ Toolbar.propTypes = {
     viewer: PropTypes.object,
     prevPage: PropTypes.func,
     nextPage: PropTypes.func,
+    togglePanMode: PropTypes.func,
+    scale: PropTypes.number,
 }
 
 export default Toolbar

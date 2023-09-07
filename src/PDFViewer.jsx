@@ -27,7 +27,7 @@ function PDFViewer({
   fileName,
   annotations,
   onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
-  // onScaleChange,
+  onScaleChange,
   viewerRef
 }) {
   /* This is a temp zoom level while zooming with the scroll wheel */
@@ -143,7 +143,7 @@ function PDFViewer({
     rescaledRef.current.style.width = canvasRef.current.style.width;
     rescaledRef.current.style.height = canvasRef.current.style.height;
     setScale(resultScale)
-    // onScaleChange(resultScale)
+    onScaleChange(resultScale)
     setTimeout(() => {
       setTransition(false)
     }, 500)
@@ -154,7 +154,7 @@ function PDFViewer({
     setTimeout(() => {
       wrapperRef.current.scrollTo(...scrollPosition.current)
     }, 200)
-  }, [scale, isScaleValid])
+  }, [scale, isScaleValid, onScaleChange])
 
   useZoomWheel({
     onZoom: zoomToCursor,

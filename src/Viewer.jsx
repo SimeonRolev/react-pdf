@@ -4,6 +4,7 @@ import PDFViewer from './PDFViewer';
 import styled from 'styled-components';
 import Toolbar from './Components/Toolbar';
 import ObjectInfo from './Components/ObjectInfo';
+import { Mode } from './constants';
 
 const S = {
   Wrapper: styled.div`
@@ -22,16 +23,16 @@ const S = {
 function Viewer(props) {
   const viewer = React.useRef();
   const [loading, setLoading] = React.useState(true);
-  /* 
+  const [scale, setScale] = React.useState(1);
   
-    const togglePanMode = () => {
-      if (viewerRef.current.mode !== Mode.PAN) {
-        viewerRef.current.setMode(Mode.PAN);
-      } else {
-        viewerRef.current.setMode(Mode.NORMAL)
-      }
+  const togglePanMode = () => {
+    if (viewer.current.mode !== Mode.PAN) {
+      viewer.current.setMode(Mode.PAN);
+    } else {
+      viewer.current.setMode(Mode.NORMAL)
     }
-  */
+  }
+
 
   return (
     <S.Wrapper>
@@ -39,14 +40,17 @@ function Viewer(props) {
         {
           !loading && (
             <Toolbar
+              scale={scale}
               nextPage={() => viewer.current.nextPage()}
               prevPage={() => viewer.current.prevPage()}
+              togglePanMode={togglePanMode}
             />
           )
         }
         <PDFViewer
           viewerRef={viewer}
           onDocumentLoadSuccess={() => { setLoading(false) }}
+          onScaleChange={value => setScale(value)}
           {...props}
         />
       </S.Content>
