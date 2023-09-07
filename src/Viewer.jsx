@@ -5,11 +5,17 @@ import { Document, Page } from 'react-pdf';
 import { pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
-import { detectMouseWheelDirection } from './util';
+
+// Util, consts
 import { Mode, ZOOM_STEP } from "./constants"
-import { usePan, usePanOnSpace } from './Pan';
-import Overlay from './Annotations/Overlay';
 import { Page as PageClass } from './point';
+
+// Hooks
+import { usePan, usePanOnSpace } from './hooks/pan';
+import { useZoomWheel } from './hooks/zoom-wheel';
+
+// UI
+import Overlay from './Annotations/Overlay';
 import Ghost from './Ghost';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -42,7 +48,6 @@ function Viewer({
   const canvasRef = React.useRef();
   const rescaledRef = React.useRef();
   const scrollPosition = React.useRef([0, 0]);
-  const wheeling = React.useRef(false);
 
   const panProps = usePan({
     getNode: () => wrapperRef.current
@@ -123,6 +128,7 @@ function Viewer({
   }, [isScaleValid, scale])
 
   const rescalePDF = React.useCallback(() => {
+    setTransition(true)
     const resultScale = scale * pdfScale.current
     if (!isScaleValid(resultScale)) return;
 
@@ -138,7 +144,6 @@ function Viewer({
     rescaledRef.current.style.height = canvasRef.current.style.height;
     setScale(resultScale)
     onScaleChange(resultScale)
-    setTransition(true)
     setTimeout(() => {
       setTransition(false)
     }, 500)
@@ -151,39 +156,11 @@ function Viewer({
     }, 200)
   }, [scale, isScaleValid, onScaleChange])
 
-  /* 
-    https://github.com/wojtekmaj/react-pdf/issues/493
-  */
-  React.useEffect(() => {
-    const onWheel = (e) => {
-      wheeling.current = true;
-      if (e.ctrlKey) {
-        e.preventDefault()
-        zoomToCursor(e, detectMouseWheelDirection(e) === 'up')
-      }
-    }
-
-    const onKeyUp = e => {
-      if (e.key === 'Control') {
-        if (wheeling.current === true) {
-          wheeling.current = false;
-          rescalePDF()
-        }
-      }
-      if ([Mode.ZOOM_IN.name, Mode.ZOOM_OUT.name].includes[mode.name]) {
-        rescalePDF()
-      }
-    }
-
-    /* TODO: Clarity on Ctrl UP */
-    /* TODO: Max zoom. BLurred zoom might not be able to get clear picture on PDF re-render */
-    document.body.addEventListener('wheel', onWheel, { passive: false });
-    document.body.addEventListener('keyup', onKeyUp, { passive: false })
-    return () => {
-      document.body.removeEventListener('wheel', onWheel, { passive: false })
-      document.body.removeEventListener('keyup', onKeyUp, { passive: false })
-    }
-  }, [_initialHeight, _initialWidth, scale, mode.name, zoomToCursor, rescalePDF])
+  useZoomWheel({
+    onZoom: zoomToCursor,
+    onZoomEnd: rescalePDF,
+    transition
+  })
 
   const scrollToPage = (n) => {
     setVisiblePages([pageRefs.current[n]]);
@@ -194,6 +171,7 @@ function Viewer({
     setMode,
     mode
   }
+
   const handleEvent = handlerName => e => {
     if (
       e.nativeEvent.which === 2 &&
@@ -208,18 +186,6 @@ function Viewer({
   const eventHandlers = {
     [Mode.NORMAL.name]: {},
     [Mode.PAN.name]: panProps,
-    [Mode.ZOOM_IN.name]: {
-      onClick: (e) => {
-        zoomToCursor(e, true)
-        rescalePDF()
-      }
-    },
-    [Mode.ZOOM_OUT.name]: {
-      onClick: (e) => {
-        zoomToCursor(e, false)
-        rescalePDF()
-      }
-    }
   }
 
   return (

@@ -48,14 +48,6 @@ function App() {
     setScale(scale)
   }, [])
 
-  const zoomIn = React.useCallback(() => {
-    viewerRef.current.setMode(Mode.ZOOM_IN)
-  }, [])
-
-  const zoomOut = React.useCallback(() => {
-    viewerRef.current.setMode(Mode.ZOOM_OUT)
-  }, [])
-
   const scrollToPage = (n) => {
     if (n > 0 && n <= numPages) {
       setPageNumber(n);
@@ -99,9 +91,7 @@ function App() {
           borderRadius: 4,
         }}>
           Zoom:
-          <button onClick={zoomOut}>-</button>
           <span>{parseInt(scale * 100) + '%'}</span>
-          <button onClick={zoomIn}>+</button>
 
           <button onClick={() => scrollToPage(pageNumber - 1)}>Prev</button>
           <PageNumberInput

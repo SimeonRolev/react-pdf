@@ -1,9 +1,7 @@
 import React from 'react';
-import { Mode } from './constants';
+import { Mode } from '../constants';
 
 /* TODO: Attach the events to the viewer not the docment */
-/* TODO: Fix pan, zoom in, pan mode clicking bug */
-
 export function usePanOnSpace({ setMode }) {
     React.useEffect(() => {
         const disposers = [];
