@@ -37,7 +37,7 @@ function Overlay({ page, scale, annotations = {} }) {
         >
             <svg
                 viewBox={`0 0 ${page.width} ${page.height}`}
-                style={{ position: 'absolute', top: 0, left: 0 }}
+                style={{ position: 'absolute', top: 0, left: 0, overflow: 'visible' }}
             >
                 {lines.map((line, index) => <LineUI key={index} line={line} scale={scale} />)}
                 {polygons.map((polygon, index) => <PolygonUI key={index} polygon={polygon} scale={scale} />)}
