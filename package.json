@@ -23,9 +23,13 @@
     "vitest": "vitest"
   },
   "dependencies": {
+    "@emotion/styled": "^11.11.0",
+    "@vectorworks/vcs-icons": "^1.0.34",
+    "@vectorworks/vcs-ui": "^0.1.74",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-pdf": "^7.2.0"
+    "react-pdf": "^7.2.0",
+    "styled-components": "^5.3.11"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

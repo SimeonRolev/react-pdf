@@ -2,6 +2,9 @@ import React from 'react'
 import Viewer from './Viewer'
 import PageNumberInput from './Components/PageNumberInput';
 import { Mode } from './constants';
+import '@vectorworks/vcs-ui/dist/colors.css'
+import '@vectorworks/vcs-ui/dist/base.css'
+import '@vectorworks/vcs-icons/style.css';
 
 const annotations = {
   1: {
@@ -33,6 +36,7 @@ const annotations = {
   }
 }
 
+window.gettext = val => val;
 
 function App() {
   const viewerRef = React.useRef({})
