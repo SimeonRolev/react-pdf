@@ -1,28 +1,42 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Polygon as PolygonInstance, Page } from '../point'
+import { Polygon as PolygonInstance } from '../point'
 
-function Polygon({ polygon }) {
-    const ref = React.useRef();
+function Polygon({ polygon, scale }) {
+    const polylineRef = React.useRef();
+
+    const onMouseEnter = () => {
+        polylineRef.current.style.stroke = "orange"
+    }
+
+    const onMouseLeave = () => {
+        polylineRef.current.style.stroke = "transparent"
+    }
 
     return (
-        <polygon
-            ref={ref}
-            points={
-                polygon.vertices
-                    .map(v => `${v.left * polygon.page.width},${v.top * polygon.page.height}`)
-                    .join(' ')
-            }
-            onMouseEnter={() => { ref.current.style.fill = "rgba(0, 255, 0, 0.2)" }}
-            onMouseLeave={() => { ref.current.style.fill = "rgba(255, 0, 0, 0)" }}
-            style={{ fill: "rgba(255, 0, 0, 0)" }}
-        ></polygon>
+        <React.Fragment>
+            <polyline
+                ref={polylineRef}
+                points={
+                    [...polygon.vertices, polygon.vertices[0]]
+                        .map(v => `${v.left * polygon.page.width},${v.top * polygon.page.height}`)
+                        .join(' ')
+                }
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+                style={{
+                    fill: "transparent",
+                    stroke: "transparent",
+                    strokeWidth: 2 / scale
+                }}
+            ></polyline>
+        </React.Fragment>
     )
 }
 
 Polygon.propTypes = {
     polygon: PropTypes.instanceOf(PolygonInstance),
-    page: PropTypes.instanceOf(Page)
+    scale: PropTypes.number
 }
 
 export default Polygon

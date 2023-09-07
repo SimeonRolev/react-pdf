@@ -40,7 +40,7 @@ function Overlay({ page, scale, annotations = {} }) {
                 style={{ position: 'absolute', top: 0, left: 0 }}
             >
                 {lines.map((line, index) => <LineUI key={index} line={line} scale={scale} />)}
-                {polygons.map((polygon, index) => <PolygonUI key={index} polygon={polygon} />)}
+                {polygons.map((polygon, index) => <PolygonUI key={index} polygon={polygon} scale={scale} />)}
             </svg>
             {points.map((point, index) => <PointUI key={index} point={point} />)}
         </div>
