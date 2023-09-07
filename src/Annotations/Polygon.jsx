@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Polygon as PolygonInstance } from '../point'
+import { Polygon as PolygonInstance } from '../models'
 
 function Polygon({ polygon, scale, onClick, isSelected }) {
     const polylineRef = React.useRef();

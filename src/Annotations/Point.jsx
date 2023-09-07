@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Point } from '../point'
+import { Point } from '../models'
 
 function PointUI({point, isSelected, ...rest}) {
     const ref = React.useRef(null)

@@ -12,6 +12,7 @@ const S = {
         flex-shrink: 0;
         align-items: center;
         border-bottom: 1px solid var(--border-color);
+        padding: 0 15px;
     `,
     Separator: styled.div`
         margin: 0 8px;
@@ -24,6 +25,11 @@ const S = {
 function Toolbar({ prevPage, nextPage, scale, togglePanMode }) {
     return (
         <S.Toolbar>
+            <IconButton onClick={togglePanMode}>
+                <Icon icon='hand' />
+            </IconButton>
+            <S.Separator />
+
             <IconButton onClick={prevPage}>
                 <Icon icon='left-arrow' />
             </IconButton>
@@ -31,13 +37,8 @@ function Toolbar({ prevPage, nextPage, scale, togglePanMode }) {
                 <Icon icon='right-arrow' />
             </IconButton>
             <S.Separator />
-            { parseInt(scale * 100) + '%' }
+            {parseInt(scale * 100) + '%'}
 
-            <S.Separator />
-
-            <IconButton onClick={togglePanMode}>
-                <Icon icon='hand' />
-            </IconButton>
         </S.Toolbar>
     )
 }

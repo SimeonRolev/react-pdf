@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Page, Point, Line, Polygon } from '../point';
+import { Page, Point, Line, Polygon } from '../models';
 import PointUI from './Point';
 import LineUI from './Line';
 import PolygonUI from './Polygon';

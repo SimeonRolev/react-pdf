@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Line as LineInstance } from '../point'
+import { Line as LineInstance } from '../models'
 
 function Line({ line, scale, onClick, isSelected }) {
     const ref = React.useRef();

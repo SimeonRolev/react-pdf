@@ -8,7 +8,7 @@ import 'react-pdf/dist/esm/Page/TextLayer.css';
 
 // Util, consts
 import { Mode, ZOOM_STEP } from "./constants"
-import { Page as PageClass } from './point';
+import { Page as PageClass } from './models';
 
 // Hooks
 import { usePan, usePanOnSpace } from './hooks/pan';
