@@ -6,8 +6,7 @@ import LineUI from './Line';
 import PolygonUI from './Polygon';
 
 
-function Overlay({ page, scale, annotations = {}, onObjectSelect }) {
-
+function Overlay({ page, scale, annotations = {}, selection, setSelection }) {
     const points = (annotations.points || []).map(({ x, y }) => {
         return Point.fromCenter({
             x, y, page
@@ -39,10 +38,54 @@ function Overlay({ page, scale, annotations = {}, onObjectSelect }) {
                 viewBox={`0 0 ${page.width} ${page.height}`}
                 style={{ position: 'absolute', top: 0, left: 0, overflow: 'visible' }}
             >
-                {lines.map((line, index) => <LineUI key={index} line={line} scale={scale} onClick={() => onObjectSelect(line)} />)}
-                {polygons.map((polygon, index) => <PolygonUI key={index} polygon={polygon} scale={scale} onClick={() => onObjectSelect(polygon)}/>)}
+                {
+                    lines.map(
+                        (line, index) => (
+                            <LineUI
+                                key={index}
+                                line={line}
+                                scale={scale}
+                                isSelected={selection && line.compare(selection)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelection(line)
+                                }}
+                            />
+                        )
+                    )
+                }
+                {
+                    polygons.map(
+                        (polygon, index) => (
+                            <PolygonUI
+                                key={index}
+                                polygon={polygon}
+                                scale={scale}
+                                isSelected={selection && polygon.compare(selection)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelection(polygon)
+                                }}
+                            />
+                        )
+                    )
+                }
             </svg>
-            {points.map((point, index) => <PointUI key={index} point={point} onClick={() => onObjectSelect(point)}/>)}
+            {
+                points.map(
+                    (point, index) => (
+                        <PointUI
+                            key={index}
+                            point={point}
+                            isSelected={selection && point.compare(selection)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelection(point)
+                            }}
+                        />
+                    )
+                )
+            }
         </div>
     )
 }
@@ -50,7 +93,8 @@ function Overlay({ page, scale, annotations = {}, onObjectSelect }) {
 Overlay.propTypes = {
     page: PropTypes.instanceOf(Page),
     scale: PropTypes.number,
-    onObjectSelect: PropTypes.func,
+    setSelection: PropTypes.func,
+    selection: PropTypes.object,
     annotations: PropTypes.shape({
         points: PropTypes.arrayOf(PropTypes.shape({
             x: PropTypes.number,

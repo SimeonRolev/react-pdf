@@ -28,7 +28,8 @@ function PDFViewer({
   annotations,
   onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
   onScaleChange,
-  onObjectSelect,
+  setSelection,
+  selection,
   viewerRef
 }) {
   /* This is a temp zoom level while zooming with the scroll wheel */
@@ -214,6 +215,7 @@ function PDFViewer({
         display: 'flex',
         overflow: 'scroll'
       }}
+      onClick={() => setSelection(null)}
     >
       <div
         id='canvas'
@@ -267,7 +269,8 @@ function PDFViewer({
                       })}
                       scale={scale}
                       annotations={annotations[page.pageNumber]}
-                      onObjectSelect={onObjectSelect}
+                      setSelection={setSelection}
+                      selection={selection}
                     />
                   </Page>
                 )
@@ -292,7 +295,8 @@ PDFViewer.propTypes = {
   onDocumentLoadSuccess: PropTypes.func,
   onCurrentPageChange: PropTypes.func,
   onScaleChange: PropTypes.func,
-  onObjectSelect: PropTypes.func,
+  setSelection: PropTypes.func,
+  selection: PropTypes.object,
   viewerRef: PropTypes.object
 }
 

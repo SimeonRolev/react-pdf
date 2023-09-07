@@ -30,7 +30,9 @@ function ObjectInfo({ entry }) {
                 <Dialog.Title>{gettext('Object info')}</Dialog.Title>
             </Dialog.Header>
             <S.Content>
-                {entry ? JSON.stringify(entry) : gettext('No object selected')}
+                {entry ?
+                    (entry.info ? entry.info() : JSON.stringify(entry))   
+                    : gettext('No object selected')}
             </S.Content>
         </S.Wrapper>
     )

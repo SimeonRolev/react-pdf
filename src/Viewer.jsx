@@ -34,10 +34,6 @@ function Viewer(props) {
     }
   }
 
-  const onObjectSelect = entry => {
-    setSelection(entry)
-  }
-
   return (
     <S.Wrapper>
       <S.Content>
@@ -55,7 +51,8 @@ function Viewer(props) {
           viewerRef={viewer}
           onDocumentLoadSuccess={() => { setLoading(false) }}
           onScaleChange={value => setScale(value)}
-          onObjectSelect={onObjectSelect}
+          setSelection={setSelection}
+          selection={selection}
           {...props}
         />
       </S.Content>

@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Polygon as PolygonInstance } from '../point'
 
-function Polygon({ polygon, scale, onClick }) {
+function Polygon({ polygon, scale, onClick, isSelected }) {
     const polylineRef = React.useRef();
 
     const onMouseEnter = () => {
@@ -10,7 +10,9 @@ function Polygon({ polygon, scale, onClick }) {
     }
 
     const onMouseLeave = () => {
-        polylineRef.current.style.stroke = "transparent"
+        if (!isSelected) {
+            polylineRef.current.style.stroke = "transparent"
+        }
     }
 
     return (
@@ -27,8 +29,8 @@ function Polygon({ polygon, scale, onClick }) {
                 onClick={onClick}
                 style={{
                     fill: "transparent",
-                    stroke: "transparent",
-                    strokeWidth: 2 / scale
+                    stroke: isSelected ? "orange" : "transparent",
+                    strokeWidth: 1 / scale
                 }}
             ></polyline>
         </React.Fragment>
@@ -38,7 +40,8 @@ function Polygon({ polygon, scale, onClick }) {
 Polygon.propTypes = {
     polygon: PropTypes.instanceOf(PolygonInstance),
     scale: PropTypes.number,
-    onClick: PropTypes.func
+    onClick: PropTypes.func,
+    isSelected: PropTypes.bool
 }
 
 export default Polygon
