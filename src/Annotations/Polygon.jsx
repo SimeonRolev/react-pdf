@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Polygon as PolygonInstance } from '../point'
 
-function Polygon({ polygon, scale }) {
+function Polygon({ polygon, scale, onClick }) {
     const polylineRef = React.useRef();
 
     const onMouseEnter = () => {
@@ -24,6 +24,7 @@ function Polygon({ polygon, scale }) {
                 }
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
+                onClick={onClick}
                 style={{
                     fill: "transparent",
                     stroke: "transparent",
@@ -36,7 +37,8 @@ function Polygon({ polygon, scale }) {
 
 Polygon.propTypes = {
     polygon: PropTypes.instanceOf(PolygonInstance),
-    scale: PropTypes.number
+    scale: PropTypes.number,
+    onClick: PropTypes.func
 }
 
 export default Polygon

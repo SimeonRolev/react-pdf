@@ -28,6 +28,7 @@ function PDFViewer({
   annotations,
   onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
   onScaleChange,
+  onObjectSelect,
   viewerRef
 }) {
   /* This is a temp zoom level while zooming with the scroll wheel */
@@ -266,6 +267,7 @@ function PDFViewer({
                       })}
                       scale={scale}
                       annotations={annotations[page.pageNumber]}
+                      onObjectSelect={onObjectSelect}
                     />
                   </Page>
                 )
@@ -286,10 +288,11 @@ PDFViewer.defaultProps = {
 
 PDFViewer.propTypes = {
   fileName: PropTypes.string,
-  annotations: PropTypes.arrayOf(PropTypes.any),
+  annotations: PropTypes.object,
   onDocumentLoadSuccess: PropTypes.func,
   onCurrentPageChange: PropTypes.func,
   onScaleChange: PropTypes.func,
+  onObjectSelect: PropTypes.func,
   viewerRef: PropTypes.object
 }
 

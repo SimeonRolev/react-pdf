@@ -24,6 +24,7 @@ function Viewer(props) {
   const viewer = React.useRef();
   const [loading, setLoading] = React.useState(true);
   const [scale, setScale] = React.useState(1);
+  const [selection, setSelection] = React.useState();
   
   const togglePanMode = () => {
     if (viewer.current.mode !== Mode.PAN) {
@@ -33,6 +34,9 @@ function Viewer(props) {
     }
   }
 
+  const onObjectSelect = entry => {
+    setSelection(entry)
+  }
 
   return (
     <S.Wrapper>
@@ -51,10 +55,11 @@ function Viewer(props) {
           viewerRef={viewer}
           onDocumentLoadSuccess={() => { setLoading(false) }}
           onScaleChange={value => setScale(value)}
+          onObjectSelect={onObjectSelect}
           {...props}
         />
       </S.Content>
-      <ObjectInfo />
+      <ObjectInfo entry={selection} />
     </S.Wrapper>
   )
 }

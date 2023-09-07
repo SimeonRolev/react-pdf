@@ -6,7 +6,7 @@ import LineUI from './Line';
 import PolygonUI from './Polygon';
 
 
-function Overlay({ page, scale, annotations = {} }) {
+function Overlay({ page, scale, annotations = {}, onObjectSelect }) {
 
     const points = (annotations.points || []).map(({ x, y }) => {
         return Point.fromCenter({
@@ -39,10 +39,10 @@ function Overlay({ page, scale, annotations = {} }) {
                 viewBox={`0 0 ${page.width} ${page.height}`}
                 style={{ position: 'absolute', top: 0, left: 0, overflow: 'visible' }}
             >
-                {lines.map((line, index) => <LineUI key={index} line={line} scale={scale} />)}
-                {polygons.map((polygon, index) => <PolygonUI key={index} polygon={polygon} scale={scale} />)}
+                {lines.map((line, index) => <LineUI key={index} line={line} scale={scale} onClick={() => onObjectSelect(line)} />)}
+                {polygons.map((polygon, index) => <PolygonUI key={index} polygon={polygon} scale={scale} onClick={() => onObjectSelect(polygon)}/>)}
             </svg>
-            {points.map((point, index) => <PointUI key={index} point={point} />)}
+            {points.map((point, index) => <PointUI key={index} point={point} onClick={() => onObjectSelect(point)}/>)}
         </div>
     )
 }
@@ -50,6 +50,7 @@ function Overlay({ page, scale, annotations = {} }) {
 Overlay.propTypes = {
     page: PropTypes.instanceOf(Page),
     scale: PropTypes.number,
+    onObjectSelect: PropTypes.func,
     annotations: PropTypes.shape({
         points: PropTypes.arrayOf(PropTypes.shape({
             x: PropTypes.number,

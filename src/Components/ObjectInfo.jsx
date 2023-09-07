@@ -5,29 +5,39 @@ import { Dialog } from '@vectorworks/vcs-ui/dist/lib/Dialog/Dialog';
 
 import styled from 'styled-components';
 
-const Wrapper = styled(Drawer)`
-    .MuiPaper-root {
-        width: 250px;
-        position: static;
-        background-color: var(--bg-color);
-    }
-`;
+const S = {
+    Wrapper: styled(Drawer)`
+        .MuiPaper-root {
+            width: 320px;
+            position: static;
+            background-color: var(--bg-color);
+        }
+    `,
+    Content: styled.div`
+        padding: 15px;
+        word-wrap: break-word;
+    `
+}
 
 
-function ObjectInfo() {
+function ObjectInfo({ entry }) {
     return (
-        <Wrapper
+        <S.Wrapper
             anchor={'right'}
             variant={'permanent'}
         >
             <Dialog.Header borderBottom>
                 <Dialog.Title>{gettext('Object info')}</Dialog.Title>
             </Dialog.Header>
-            No object selected
-        </Wrapper>
+            <S.Content>
+                {entry ? JSON.stringify(entry) : gettext('No object selected')}
+            </S.Content>
+        </S.Wrapper>
     )
 }
 
-ObjectInfo.propTypes = {}
+ObjectInfo.propTypes = {
+    entry: PropTypes.object
+}
 
 export default ObjectInfo
