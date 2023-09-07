@@ -2,13 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Document, Page } from 'react-pdf'
 
-function Ghost({ fileName, scale, isVisible }) {
-  const [numPages, setNumPages] = React.useState();
+function Ghost({ fileName, scale, visiblePages, isVisible }) {
   const ref = React.useRef();
-
-  function onDocumentLoadSuccess(doc) {
-    setNumPages(doc.numPages)
-  }
 
   return (
     <div
@@ -25,15 +20,14 @@ function Ghost({ fileName, scale, isVisible }) {
     >
       <Document
         file={fileName}
-        onLoadSuccess={onDocumentLoadSuccess}
       >
         {(
-          [...new Array(numPages)]
-            .map((_, index) => {
+          visiblePages
+            .map(({ pageNumber }) => {
               return (
                 <Page
-                  key={index + 1}
-                  pageNumber={index + 1}
+                  key={pageNumber}
+                  pageNumber={pageNumber}
                   scale={1}
                 />
               )
@@ -48,6 +42,7 @@ function Ghost({ fileName, scale, isVisible }) {
 Ghost.propTypes = {
   fileName: PropTypes.string,
   scale: PropTypes.number,
+  visiblePages: PropTypes.array,
   isVisible: PropTypes.bool,
 }
 

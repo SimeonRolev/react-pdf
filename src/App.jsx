@@ -44,10 +44,6 @@ function App() {
     setNumPages(document.numPages)
   }, [])
 
-  const onCurrentPageChange = React.useCallback((page) => {
-    setPageNumber(page);
-  }, [])
-
   const onScaleChange = React.useCallback((scale) => {
     setScale(scale)
   }, [])
@@ -62,6 +58,7 @@ function App() {
 
   const scrollToPage = (n) => {
     if (n > 0 && n <= numPages) {
+      setPageNumber(n);
       viewerRef.current.scrollToPage(n)
     }
   }
@@ -83,7 +80,6 @@ function App() {
         viewerRef={viewerRef}
         fileName={'Public Library Sample.pdf'}
         onDocumentLoadSuccess={onDocumentLoadSuccess}
-        onCurrentPageChange={onCurrentPageChange}
         onScaleChange={onScaleChange}
         annotations={annotations}
       />

@@ -21,7 +21,6 @@ function Viewer({
   fileName,
   annotations,
   onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
-  onCurrentPageChange,
   onScaleChange,
   viewerRef
 }) {
@@ -30,8 +29,7 @@ function Viewer({
   const [scaleLimit, setScaleLimit] = useState(10);
   const [transition, setTransition] = useState(false);
   const [mode, setMode] = useState(Mode.NORMAL);
-  const [observePages, setObservePages] = useState(false);
-  const [numPages, setNumPages] = useState();
+  const [visiblePages, setVisiblePages] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -56,9 +54,24 @@ function Viewer({
     return input > 0.25 && input < scaleLimit
   }, [scaleLimit])
 
-  function onDocumentLoadSuccess(pdfDoc) {
-    setNumPages(pdfDoc.numPages)
+  React.useEffect(() => {
+    const width = Math.max(...visiblePages.map(p => p.width)) * scale
+    const height = visiblePages.reduce((acc, curr) => acc + curr.height, 0) * scale;
 
+    _initialWidth.current = width;
+    _initialHeight.current = height;
+    canvasRef.current.style.width = width + 'px';
+    canvasRef.current.style.height = height + 'px';
+
+    rescaledRef.current.style.width = width + 'px';
+    rescaledRef.current.style.height = height + 'px';
+
+    const biggestPage = Math.max(...visiblePages.map(p => p.width * p.height))
+    const MAX_CANVAS_SIZE = 200000000
+    setScaleLimit(Math.sqrt(MAX_CANVAS_SIZE / biggestPage));
+  }, [scale, visiblePages])
+
+  function onDocumentLoadSuccess(pdfDoc) {
     Promise.all(
       [...new Array(pdfDoc.numPages)]
         .map((_, index) => pdfDoc.getPage(index + 1))
@@ -69,25 +82,10 @@ function Viewer({
         pageRefs.current[page.pageNumber] = page
       })
 
-      const width = Math.max(...pages.map(p => p.width))
-      const height = pages.reduce((acc, curr) => acc + curr.height, 0);
-
-      _initialWidth.current = width;
-      _initialHeight.current = height;
-      canvasRef.current.style.width = width + 'px';
-      canvasRef.current.style.height = height + 'px';
-
-      rescaledRef.current.style.width = width + 'px';
-      rescaledRef.current.style.height = height + 'px';
-
-      const biggestPage = Math.max(...pages.map(p => p.width * p.height))
-      const MAX_CANVAS_SIZE = 200000000
-      setScaleLimit(Math.sqrt(MAX_CANVAS_SIZE / biggestPage));
-
+      setVisiblePages([pageRefs.current[1]]);
       setLoading(false)
       onDocumentLoadSuccessCallback(pdfDoc)
     })
-
   }
 
   const zoomToCursor = React.useCallback((e, isUp = true) => {
@@ -187,37 +185,8 @@ function Viewer({
     }
   }, [_initialHeight, _initialWidth, scale, mode.name, zoomToCursor, rescalePDF])
 
-  React.useEffect(() => {
-    const nodes = Object.values(pageRefs.current).map(p => p._domNode)
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        entry.target.setAttribute('data-intersecting', entry.isIntersecting);
-      })
-
-      const pageNumber = Math.min(
-        ...nodes
-          .filter(node => node.getAttribute('data-intersecting') === 'true')
-          .map(node => parseInt(node.getAttribute('data-page-number')))
-      )
-
-      if (pageNumber > 0 && pageNumber <= numPages) {
-        onCurrentPageChange(pageNumber)
-      }
-    }, {
-      root: wrapperRef.current
-    })
-
-    nodes.forEach(node => observer.observe(node))
-    return () => {
-      observer.disconnect()
-    }
-  }, [numPages, observePages, onCurrentPageChange])
-
   const scrollToPage = (n) => {
-    wrapperRef.current.scrollTo({
-      top: pageRefs.current[n]._domNode.offsetTop + 1,
-      behavior: 'smooth'
-    })
+    setVisiblePages([pageRefs.current[n]]);
   }
 
   viewerRef.current = {
@@ -273,6 +242,7 @@ function Viewer({
       >
         <Ghost
           fileName={fileName}
+          visiblePages={visiblePages}
           scale={scale}
           isVisible={!!transition}
         />
@@ -296,7 +266,7 @@ function Viewer({
             onLoadSuccess={onDocumentLoadSuccess}
           >
             {!loading && (
-              Object.values(pageRefs.current).map(page => {
+              visiblePages.map(page => {
                 return (
                   <Page
                     key={page.pageNumber}
@@ -305,7 +275,6 @@ function Viewer({
                     inputRef={ref => {
                       if (!ref || ref.isEqualNode(page._domNode)) return;
                       page._domNode = ref;
-                      setObservePages(Object.values(pageRefs.current).every(p => !!p._domNode))
                     }}
                   >
                     <Overlay
