@@ -16,10 +16,10 @@ const S = {
         flex-shrink: 0;
         align-items: center;
         border-bottom: 1px solid var(--border-color);
-        padding: 0 15px;
+        padding: 0 16px;
     `,
     Separator: styled.div`
-        margin: 0 8px;
+        margin: 0 16px;
         width: 1px;
         height: 30px;
         background-color: var(--border-color);
@@ -44,9 +44,6 @@ function Toolbar() {
             </IconButton>
             <S.Separator />
 
-            <IconButton onClick={navigate.prevPage}>
-                <Icon icon='left-arrow' />
-            </IconButton>
             {visiblePages.length > 0 &&
                 <Select
                     value={visiblePages[0].pageNumber}
@@ -63,9 +60,6 @@ function Toolbar() {
                             ))}
                 </Select>
             }
-            <IconButton onClick={navigate.nextPage}>
-                <Icon icon='right-arrow' />
-            </IconButton>
             <S.Separator />
             {parseInt(scale * 100) + '%'}
 
