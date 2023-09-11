@@ -30,12 +30,12 @@ function PDFViewer({
 }) {
   const {
     scale, setScale,
+    scaleLimit, setScaleLimit,
     mode, setMode,
     setSelection,
     setPages,
     visiblePages
   } = useContext(Store);
-  const [scaleLimit, setScaleLimit] = useState(10);
   const [transition, setTransition] = useState(false);
 
   const _initialWidth = React.useRef();

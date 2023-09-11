@@ -3,9 +3,17 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components';
 
 import { Select } from '@vectorworks/vcs-ui/dist/lib/Select/Select';
+import { Menu } from '@vectorworks/vcs-ui/dist/lib/Menu/Menu';
 import { MenuItem } from '@vectorworks/vcs-ui/dist/lib/MenuItem/MenuItem';
 import { Icon } from '@vectorworks/vcs-ui/dist/lib/Basics/Icons/Icon';
 import { IconButton } from '@vectorworks/vcs-ui/dist/lib/Buttons/IconButton';
+
+import {
+    usePopupState,
+    bindTrigger,
+    bindMenu,
+} from 'material-ui-popup-state/hooks';
+
 import Store from '../Store';
 import { Mode } from '../constants';
 
@@ -27,7 +35,12 @@ const S = {
 };
 
 function Toolbar() {
-    const { mode, setMode, scale, navigate, pages, visiblePages } = React.useContext(Store);
+    const { mode, setMode, scale, setScale, scaleLimit, navigate, pages, visiblePages } = React.useContext(Store);
+
+    const zoomMenu = usePopupState({
+        variant: 'popper',
+        popupId: `zoom`,
+    })
 
     const togglePanMode = () => {
         setMode(
@@ -35,6 +48,27 @@ function Toolbar() {
                 ? Mode.PAN
                 : Mode.NORMAL
         )
+    }
+
+    const scaleToString = value => {
+        return parseInt(value * 100) + '%'
+    }
+
+    const onZoomOption = (e, value) => {
+        e.stopPropagation();
+        setScale(value);
+        zoomMenu.close();
+    }
+
+    const menuProps = () => {
+        const init = bindMenu(zoomMenu);
+        return {
+            ...init,
+            onClose (e) {
+                e.stopPropagation()
+                init.onClose(e);
+            }
+        }
     }
 
     return (
@@ -61,8 +95,32 @@ function Toolbar() {
                 </Select>
             }
             <S.Separator />
-            {parseInt(scale * 100) + '%'}
+            <div
+                style={{ position: 'relative' }}
+                {...bindTrigger(zoomMenu)}
+            >
+                <div style={{ pointerEvents: 'none' }}>
+                    <Select value={scaleToString(scale)}>
+                        <MenuItem value={scaleToString(scale)}>{scaleToString(scale)}</MenuItem>
+                    </Select>
+                </div>
 
+                <Menu {...menuProps()}>
+                    <MenuItem onClick={(e) => onZoomOption(e, 0.25)}>25%</MenuItem>
+                    <MenuItem onClick={(e) => onZoomOption(e, 0.5)}>50%</MenuItem>
+
+                    {[...new Array(parseInt(scaleLimit))]
+                        .map((_, index) => {
+                            return (
+                                <MenuItem
+                                    key={index}
+                                    onClick={(e) => onZoomOption(e, index + 1)}
+                                >{scaleToString(index + 1)}</MenuItem>
+                            )
+                        })}
+                </Menu>
+
+            </div>
         </S.Toolbar>
     )
 }

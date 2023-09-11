@@ -6,6 +6,7 @@ export function useStore() {
 
     const [selection, setSelection] = useState();
     const [scale, setScale] = useState(1);
+    const [scaleLimit, setScaleLimit] = useState(5);
     const [mode, setMode] = useState(Mode.NORMAL);
 
     const [pages, setPages] = useState({});
@@ -37,6 +38,7 @@ export function useStore() {
         pageRefs,
         selection, setSelection,
         scale, setScale,
+        scaleLimit, setScaleLimit,
         mode, setMode,
         pages, setPages,
         visiblePages, setVisiblePages,
