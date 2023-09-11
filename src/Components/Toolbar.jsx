@@ -25,8 +25,8 @@ const S = {
     `
 };
 
-function Toolbar({ scale, togglePanMode }) {
-    const { navigate, pages, visiblePages } = React.useContext(Store);
+function Toolbar({ togglePanMode }) {
+    const { scale, navigate, pages, visiblePages } = React.useContext(Store);
 
     return (
         <S.Toolbar>

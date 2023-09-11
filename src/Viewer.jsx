@@ -25,7 +25,6 @@ const S = {
 function Viewer(props) {
   const viewer = React.useRef();
   const [loading, setLoading] = React.useState(true);
-  const [scale, setScale] = React.useState(1);
   const [selection, setSelection] = React.useState();
 
   const store = useStore();
@@ -45,7 +44,6 @@ function Viewer(props) {
           {
             !loading && (
               <Toolbar
-                scale={scale}
                 togglePanMode={togglePanMode}
               />
             )
@@ -53,7 +51,6 @@ function Viewer(props) {
           <PDFViewer
             viewerRef={viewer}
             onDocumentLoadSuccess={() => { setLoading(false) }}
-            onScaleChange={value => setScale(value)}
             setSelection={setSelection}
             selection={selection}
             {...props}

@@ -28,17 +28,15 @@ function PDFViewer({
   fileName,
   annotations,
   onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
-  onScaleChange,
   setSelection,
   selection,
   viewerRef
 }) {
   const {
+    scale, setScale,
     setPages,
     visiblePages
   } = useContext(Store);
-  /* This is a temp zoom level while zooming with the scroll wheel */
-  const [scale, setScale] = useState(1);
   const [scaleLimit, setScaleLimit] = useState(10);
   const [transition, setTransition] = useState(false);
   const [mode, setMode] = useState(Mode.NORMAL);
@@ -149,7 +147,6 @@ function PDFViewer({
     rescaledRef.current.style.width = canvasRef.current.style.width;
     rescaledRef.current.style.height = canvasRef.current.style.height;
     setScale(resultScale)
-    onScaleChange(resultScale)
     setTimeout(() => {
       setTransition(false)
     }, 500)
@@ -160,7 +157,7 @@ function PDFViewer({
     setTimeout(() => {
       wrapperRef.current.scrollTo(...scrollPosition.current)
     }, 200)
-  }, [scale, isScaleValid, onScaleChange])
+  }, [scale, isScaleValid])
 
   useZoomWheel({
     onZoom: zoomToCursor,
@@ -277,7 +274,6 @@ PDFViewer.propTypes = {
   annotations: PropTypes.object,
   onDocumentLoadSuccess: PropTypes.func,
   onCurrentPageChange: PropTypes.func,
-  onScaleChange: PropTypes.func,
   setSelection: PropTypes.func,
   selection: PropTypes.object,
   viewerRef: PropTypes.object

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 export function useStore() {
     const pageRefs = useRef({});
+    const [scale, setScale] = useState(1);
     const [pages, setPages] = useState({});
     const [visiblePages, setVisiblePages] = useState([]);
 
@@ -29,6 +30,8 @@ export function useStore() {
 
     return {
         pageRefs,
+        scale,
+        setScale,
         pages,
         setPages,
         visiblePages,
@@ -36,7 +39,7 @@ export function useStore() {
         navigate: {
             toPage,
             prevPage,
-            nextPage
-        }
+            nextPage,
+        },
     };
 }
