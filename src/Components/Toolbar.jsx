@@ -7,6 +7,7 @@ import { MenuItem } from '@vectorworks/vcs-ui/dist/lib/MenuItem/MenuItem';
 import { Icon } from '@vectorworks/vcs-ui/dist/lib/Basics/Icons/Icon';
 import { IconButton } from '@vectorworks/vcs-ui/dist/lib/Buttons/IconButton';
 import Store from '../Store';
+import { Mode } from '../constants';
 
 const S = {
     Toolbar: styled.div`
@@ -25,8 +26,16 @@ const S = {
     `
 };
 
-function Toolbar({ togglePanMode }) {
-    const { scale, navigate, pages, visiblePages } = React.useContext(Store);
+function Toolbar() {
+    const { mode, setMode, scale, navigate, pages, visiblePages } = React.useContext(Store);
+
+    const togglePanMode = () => {
+        setMode(
+            mode !== Mode.PAN
+                ? Mode.PAN
+                : Mode.NORMAL
+        )
+    }
 
     return (
         <S.Toolbar>
@@ -62,15 +71,6 @@ function Toolbar({ togglePanMode }) {
 
         </S.Toolbar>
     )
-}
-
-Toolbar.propTypes = {
-    viewer: PropTypes.object,
-    prevPage: PropTypes.func,
-    nextPage: PropTypes.func,
-    scrollToPage: PropTypes.func,
-    togglePanMode: PropTypes.func,
-    scale: PropTypes.number,
 }
 
 export default Toolbar

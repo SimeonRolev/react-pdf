@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { Mode } from '../constants';
 
 export function useStore() {
     const pageRefs = useRef({});
     const [scale, setScale] = useState(1);
+    const [mode, setMode] = useState(Mode.NORMAL);
+
     const [pages, setPages] = useState({});
     const [visiblePages, setVisiblePages] = useState([]);
 
@@ -30,12 +33,10 @@ export function useStore() {
 
     return {
         pageRefs,
-        scale,
-        setScale,
-        pages,
-        setPages,
-        visiblePages,
-        setVisiblePages,
+        scale, setScale,
+        mode, setMode,
+        pages, setPages,
+        visiblePages, setVisiblePages,
         navigate: {
             toPage,
             prevPage,

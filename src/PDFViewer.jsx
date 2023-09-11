@@ -29,17 +29,16 @@ function PDFViewer({
   annotations,
   onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
   setSelection,
-  selection,
-  viewerRef
+  selection
 }) {
   const {
     scale, setScale,
+    mode, setMode,
     setPages,
     visiblePages
   } = useContext(Store);
   const [scaleLimit, setScaleLimit] = useState(10);
   const [transition, setTransition] = useState(false);
-  const [mode, setMode] = useState(Mode.NORMAL);
 
   const [loading, setLoading] = useState(true);
 
@@ -157,18 +156,13 @@ function PDFViewer({
     setTimeout(() => {
       wrapperRef.current.scrollTo(...scrollPosition.current)
     }, 200)
-  }, [scale, isScaleValid])
+  }, [scale, isScaleValid, setScale])
 
   useZoomWheel({
     onZoom: zoomToCursor,
     onZoomEnd: rescalePDF,
     transition
   })
-
-  viewerRef.current = {
-    setMode,
-    mode
-  }
 
   const handleEvent = handlerName => e => {
     if (
@@ -275,8 +269,7 @@ PDFViewer.propTypes = {
   onDocumentLoadSuccess: PropTypes.func,
   onCurrentPageChange: PropTypes.func,
   setSelection: PropTypes.func,
-  selection: PropTypes.object,
-  viewerRef: PropTypes.object
+  selection: PropTypes.object
 }
 
 export default PDFViewer

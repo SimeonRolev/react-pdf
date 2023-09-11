@@ -23,19 +23,10 @@ const S = {
 }
 
 function Viewer(props) {
-  const viewer = React.useRef();
   const [loading, setLoading] = React.useState(true);
   const [selection, setSelection] = React.useState();
 
   const store = useStore();
-
-  const togglePanMode = () => {
-    if (viewer.current.mode !== Mode.PAN) {
-      viewer.current.setMode(Mode.PAN);
-    } else {
-      viewer.current.setMode(Mode.NORMAL)
-    }
-  }
 
   return (
     <S.Wrapper>
@@ -43,13 +34,10 @@ function Viewer(props) {
         <S.Content>
           {
             !loading && (
-              <Toolbar
-                togglePanMode={togglePanMode}
-              />
+              <Toolbar />
             )
           }
           <PDFViewer
-            viewerRef={viewer}
             onDocumentLoadSuccess={() => { setLoading(false) }}
             setSelection={setSelection}
             selection={selection}
