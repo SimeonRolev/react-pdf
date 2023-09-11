@@ -6,6 +6,7 @@ import { Tabs, TabsList, Tab, TabPanel } from '@vectorworks/vcs-ui/dist/lib/Tabs
 
 import styled from 'styled-components';
 import Store from '../Store';
+import SheetListItem from './SheetListItem';
 
 const S = {
     Wrapper: styled(Drawer)`
@@ -24,7 +25,7 @@ const S = {
 
 
 function ObjectInfo() {
-    const { selection: entry } = React.useContext(Store);
+    const { selection: entry, pages } = React.useContext(Store);
 
     return (
         <S.Wrapper
@@ -37,7 +38,7 @@ function ObjectInfo() {
             <S.Content
                 style={{ height: '50%' }}
             >
-            {entry ?
+                {entry ?
                     (entry.info ? entry.info() : JSON.stringify(entry))
                     : gettext('No object selected')}
                 <div
@@ -56,32 +57,17 @@ function ObjectInfo() {
                     <Tab>{gettext("Worksheets")}</Tab>
                 </TabsList>
                 <TabPanel value={0}>
-                    <div style={{ height: 50, borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', padding: 15}}>
-                        <input type="checkbox" />
-                        Sheet 1
-                    </div>
-                    <div style={{ height: 50, borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', padding: 15}}>
-                        <input type="checkbox" />
-                        Sheet 2
-                    </div><div style={{ height: 50, borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', padding: 15}}>
-                        <input type="checkbox" />
-                        Sheet 3
-                    </div>
+                    {
+                        Object
+                            .values(pages)
+                            .map(page => (
+                                <SheetListItem
+                                    key={page.pageNumber}
+                                    page={page}
+                                />
+                            ))}
                 </TabPanel>
-                <TabPanel value={1}>
-                <div>
-                        <input type="checkbox" />
-                        WOrksheet 1
-                    </div>
-                    <div>
-                        <input type="checkbox" />
-                        WOrksheet 2
-                    </div><div>
-                        <input type="checkbox" />
-                        WOrksheet 3
-                    </div>
-                
-                </TabPanel>
+                <TabPanel value={1}></TabPanel>
             </Tabs>
         </S.Wrapper>
     )
