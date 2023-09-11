@@ -26,7 +26,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 function PDFViewer({
   fileName,
-  annotations,
+  annotations = {},
 }) {
   const {
     scale, setScale,
