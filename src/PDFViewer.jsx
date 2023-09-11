@@ -125,7 +125,6 @@ function PDFViewer({
   }, [isScaleValid, scale])
 
   const rescalePDF = React.useCallback(() => {
-    setTransition(true)
     const resultScale = scale * pdfScale.current
     if (!isScaleValid(resultScale)) return;
 
@@ -139,6 +138,7 @@ function PDFViewer({
     rescaledRef.current.style.transform = `scale(1)`
     rescaledRef.current.style.width = canvasRef.current.style.width;
     rescaledRef.current.style.height = canvasRef.current.style.height;
+    setTransition(true)
     setScale(resultScale)
     setTimeout(() => {
       setTransition(false)
@@ -236,7 +236,6 @@ function PDFViewer({
                         width: page.width,
                         height: page.height
                       })}
-                      scale={scale}
                       annotations={annotations[page.pageNumber]}
                     />
                   </Page>
