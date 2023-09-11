@@ -27,9 +27,9 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 function PDFViewer({
   fileName,
   annotations,
-  onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
 }) {
   const {
+    loading, setLoading,
     scale, setScale,
     mode, setMode,
     setSelection,
@@ -38,8 +38,6 @@ function PDFViewer({
   } = useContext(Store);
   const [scaleLimit, setScaleLimit] = useState(10);
   const [transition, setTransition] = useState(false);
-
-  const [loading, setLoading] = useState(true);
 
   const _initialWidth = React.useRef();
   const _initialHeight = React.useRef();
@@ -91,7 +89,6 @@ function PDFViewer({
 
       setPages(_pages)
       setLoading(false)
-      onDocumentLoadSuccessCallback(pdfDoc)
     })
   }
 
@@ -255,16 +252,9 @@ function PDFViewer({
   )
 }
 
-PDFViewer.defaultProps = {
-  onDocumentLoadSuccess: () => { },
-  onCurrentPageChange: () => { },
-}
-
 PDFViewer.propTypes = {
   fileName: PropTypes.string,
   annotations: PropTypes.object,
-  onDocumentLoadSuccess: PropTypes.func,
-  onCurrentPageChange: PropTypes.func,
 }
 
 export default PDFViewer

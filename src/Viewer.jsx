@@ -1,10 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import PDFViewer from './PDFViewer';
 import styled from 'styled-components';
 import Toolbar from './Components/Toolbar';
 import ObjectInfo from './Components/ObjectInfo';
-import { Mode } from './constants';
 import Store from './Store';
 import { useStore } from './hooks/store';
 
@@ -23,23 +21,14 @@ const S = {
 }
 
 function Viewer(props) {
-  const [loading, setLoading] = React.useState(true);
-
   const store = useStore();
 
   return (
     <S.Wrapper>
       <Store.Provider value={store}>
         <S.Content>
-          {
-            !loading && (
-              <Toolbar />
-            )
-          }
-          <PDFViewer
-            onDocumentLoadSuccess={() => { setLoading(false) }}
-            {...props}
-          />
+          { !store.loading && <Toolbar /> }
+          <PDFViewer {...props} />
         </S.Content>
         <ObjectInfo />
       </Store.Provider>

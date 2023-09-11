@@ -3,6 +3,8 @@ import { Mode } from '../constants';
 
 export function useStore() {
     const pageRefs = useRef({});
+    const [loading, setLoading] = useState(true);
+
     const [selection, setSelection] = useState();
     const [scale, setScale] = useState(1);
     const [mode, setMode] = useState(Mode.NORMAL);
@@ -34,6 +36,7 @@ export function useStore() {
 
     return {
         pageRefs,
+        loading, setLoading,
         selection, setSelection,
         scale, setScale,
         mode, setMode,
