@@ -25,12 +25,14 @@ export function useZoomWheel({ onZoom, onZoomEnd, transition }) {
             }
         };
 
-        document.body.addEventListener('wheel', onWheel, { passive: false });
+        document
+            .getElementById('vcs-pdf-viewer__wrapper')
+            .addEventListener('wheel', onWheel, { passive: false });
         return () => {
             clear();
-            document.body.removeEventListener('wheel', onWheel, {
-                passive: false,
-            });
+            document
+                .getElementById('vcs-pdf-viewer__wrapper')
+                .removeEventListener('wheel', onWheel, { passive: false });
         };
     }, [onZoom, onZoomEnd, transition]);
 }

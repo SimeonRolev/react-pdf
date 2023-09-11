@@ -72,7 +72,7 @@ function PDFViewer({
     const biggestPage = Math.max(...visiblePages.map(p => p.width * p.height))
     const MAX_CANVAS_SIZE = 200000000
     setScaleLimit(Math.sqrt(MAX_CANVAS_SIZE / biggestPage));
-  }, [scale, visiblePages])
+  }, [scale, setScaleLimit, visiblePages])
 
   function onDocumentLoadSuccess(pdfDoc) {
     Promise.all(
@@ -177,6 +177,7 @@ function PDFViewer({
   return (
     <div
       ref={wrapperRef}
+      id='vcs-pdf-viewer__wrapper'
       style={{
         width: '100%',
         height: '100%',
