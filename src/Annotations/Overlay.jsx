@@ -4,9 +4,12 @@ import { Page, Point, Line, Polygon } from '../models';
 import PointUI from './Point';
 import LineUI from './Line';
 import PolygonUI from './Polygon';
+import Store from '../Store';
 
 
-function Overlay({ page, scale, annotations = {}, selection, setSelection }) {
+function Overlay({ page, annotations = {}}) {
+    const { scale, selection, setSelection } = React.useContext(Store);
+
     const points = (annotations.points || []).map(({ x, y }) => {
         return Point.fromCenter({
             x, y, page
@@ -92,9 +95,6 @@ function Overlay({ page, scale, annotations = {}, selection, setSelection }) {
 
 Overlay.propTypes = {
     page: PropTypes.instanceOf(Page),
-    scale: PropTypes.number,
-    setSelection: PropTypes.func,
-    selection: PropTypes.object,
     annotations: PropTypes.shape({
         points: PropTypes.arrayOf(PropTypes.shape({
             x: PropTypes.number,

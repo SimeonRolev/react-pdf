@@ -5,6 +5,7 @@ import { Dialog } from '@vectorworks/vcs-ui/dist/lib/Dialog/Dialog';
 import { Tabs, TabsList, Tab, TabPanel } from '@vectorworks/vcs-ui/dist/lib/Tabs/Tabs';
 
 import styled from 'styled-components';
+import Store from '../Store';
 
 const S = {
     Wrapper: styled(Drawer)`
@@ -22,7 +23,9 @@ const S = {
 }
 
 
-function ObjectInfo({ entry }) {
+function ObjectInfo() {
+    const { selection: entry } = React.useContext(Store);
+
     return (
         <S.Wrapper
             anchor={'right'}

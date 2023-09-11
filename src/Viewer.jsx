@@ -24,7 +24,6 @@ const S = {
 
 function Viewer(props) {
   const [loading, setLoading] = React.useState(true);
-  const [selection, setSelection] = React.useState();
 
   const store = useStore();
 
@@ -39,12 +38,10 @@ function Viewer(props) {
           }
           <PDFViewer
             onDocumentLoadSuccess={() => { setLoading(false) }}
-            setSelection={setSelection}
-            selection={selection}
             {...props}
           />
         </S.Content>
-        <ObjectInfo entry={selection} />
+        <ObjectInfo />
       </Store.Provider>
     </S.Wrapper>
   )

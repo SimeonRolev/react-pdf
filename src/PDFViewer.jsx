@@ -28,12 +28,11 @@ function PDFViewer({
   fileName,
   annotations,
   onDocumentLoadSuccess: onDocumentLoadSuccessCallback,
-  setSelection,
-  selection
 }) {
   const {
     scale, setScale,
     mode, setMode,
+    setSelection,
     setPages,
     visiblePages
   } = useContext(Store);
@@ -243,8 +242,6 @@ function PDFViewer({
                       })}
                       scale={scale}
                       annotations={annotations[page.pageNumber]}
-                      setSelection={setSelection}
-                      selection={selection}
                     />
                   </Page>
                 )
@@ -268,8 +265,6 @@ PDFViewer.propTypes = {
   annotations: PropTypes.object,
   onDocumentLoadSuccess: PropTypes.func,
   onCurrentPageChange: PropTypes.func,
-  setSelection: PropTypes.func,
-  selection: PropTypes.object
 }
 
 export default PDFViewer
