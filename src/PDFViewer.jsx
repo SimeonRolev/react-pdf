@@ -29,7 +29,6 @@ function PDFViewer({
   annotations,
 }) {
   const {
-    loading, setLoading,
     scale, setScale,
     mode, setMode,
     setSelection,
@@ -88,7 +87,6 @@ function PDFViewer({
       })
 
       setPages(_pages)
-      setLoading(false)
     })
   }
 
@@ -220,7 +218,7 @@ function PDFViewer({
             file={fileName}
             onLoadSuccess={onDocumentLoadSuccess}
           >
-            {!loading && (
+            {
               visiblePages.map(page => {
                 return (
                   <Page
@@ -243,7 +241,7 @@ function PDFViewer({
                   </Page>
                 )
               })
-            )}
+            }
 
           </Document>
         </div>

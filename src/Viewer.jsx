@@ -27,7 +27,7 @@ function Viewer(props) {
     <S.Wrapper>
       <Store.Provider value={store}>
         <S.Content>
-          { !store.loading && <Toolbar /> }
+          <Toolbar />
           <PDFViewer {...props} />
         </S.Content>
         <ObjectInfo />
