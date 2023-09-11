@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types'
 
 import { Document, Page } from 'react-pdf';
@@ -17,6 +17,7 @@ import { useZoomWheel } from './hooks/zoom-wheel';
 // UI
 import Overlay from './Annotations/Overlay';
 import Ghost from './Ghost';
+import Store from './Store';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
@@ -32,12 +33,15 @@ function PDFViewer({
   selection,
   viewerRef
 }) {
+  const {
+    setPages,
+    visiblePages
+  } = useContext(Store);
   /* This is a temp zoom level while zooming with the scroll wheel */
   const [scale, setScale] = useState(1);
   const [scaleLimit, setScaleLimit] = useState(10);
   const [transition, setTransition] = useState(false);
   const [mode, setMode] = useState(Mode.NORMAL);
-  const [visiblePages, setVisiblePages] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +49,6 @@ function PDFViewer({
   const _initialHeight = React.useRef();
 
   const wrapperRef = React.useRef(null);
-  const pageRefs = React.useRef({});
   const pdfScale = React.useRef(1);
   const canvasRef = React.useRef();
   const rescaledRef = React.useRef();
@@ -83,13 +86,14 @@ function PDFViewer({
       [...new Array(pdfDoc.numPages)]
         .map((_, index) => pdfDoc.getPage(index + 1))
     ).then(pages => {
+      let _pages = {}
       pages.forEach(page => {
         page.width = page.view[2];
         page.height = page.view[3];
-        pageRefs.current[page.pageNumber] = page
+        _pages[page.pageNumber] = page
       })
 
-      setVisiblePages([pageRefs.current[1]]);
+      setPages(_pages)
       setLoading(false)
       onDocumentLoadSuccessCallback(pdfDoc)
     })
@@ -164,28 +168,7 @@ function PDFViewer({
     transition
   })
 
-  const scrollToPage = (n) => {
-    setVisiblePages([pageRefs.current[n]]);
-  }
-
-  const prevPage = () => {
-    const current = visiblePages[0].pageNumber;
-    if (pageRefs.current[current - 1]) {
-      setVisiblePages([pageRefs.current[current - 1]])
-    }
-  }
-
-  const nextPage = () => {
-    const current = visiblePages[0].pageNumber;
-    if (pageRefs.current[current + 1]) {
-      setVisiblePages([pageRefs.current[current + 1]])
-    }
-  }
-
   viewerRef.current = {
-    scrollToPage,
-    nextPage,
-    prevPage,
     setMode,
     mode
   }

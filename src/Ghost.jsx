@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import PropTypes from 'prop-types'
 import { Document, Page } from 'react-pdf'
+import Store from './Store';
 
-function Ghost({ fileName, scale, visiblePages, isVisible }) {
+function Ghost({ fileName, scale, isVisible }) {
   const ref = React.useRef();
+  const { visiblePages } = useContext(Store)
 
   return (
     <div

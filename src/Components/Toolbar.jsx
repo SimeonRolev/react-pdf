@@ -2,8 +2,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components';
 
+import { Select } from '@vectorworks/vcs-ui/dist/lib/Select/Select';
+import { MenuItem } from '@vectorworks/vcs-ui/dist/lib/MenuItem/MenuItem';
 import { Icon } from '@vectorworks/vcs-ui/dist/lib/Basics/Icons/Icon';
 import { IconButton } from '@vectorworks/vcs-ui/dist/lib/Buttons/IconButton';
+import Store from '../Store';
 
 const S = {
     Toolbar: styled.div`
@@ -22,7 +25,9 @@ const S = {
     `
 };
 
-function Toolbar({ prevPage, nextPage, scale, togglePanMode }) {
+function Toolbar({ scale, togglePanMode }) {
+    const { navigate, pages, visiblePages } = React.useContext(Store);
+
     return (
         <S.Toolbar>
             <IconButton onClick={togglePanMode}>
@@ -30,10 +35,26 @@ function Toolbar({ prevPage, nextPage, scale, togglePanMode }) {
             </IconButton>
             <S.Separator />
 
-            <IconButton onClick={prevPage}>
+            <IconButton onClick={navigate.prevPage}>
                 <Icon icon='left-arrow' />
             </IconButton>
-            <IconButton onClick={nextPage}>
+            {visiblePages.length > 0 &&
+                <Select
+                    value={visiblePages[0].pageNumber}
+                    onChange={e => navigate.toPage(e.target.value)}
+                >
+                    {
+                        Object
+                            .values(pages)
+                            .map(page => (
+                                <MenuItem
+                                    key={page.pageNumber}
+                                    value={page.pageNumber}
+                                >{gettext('Sheet')} - {page.pageNumber}</MenuItem>
+                            ))}
+                </Select>
+            }
+            <IconButton onClick={navigate.nextPage}>
                 <Icon icon='right-arrow' />
             </IconButton>
             <S.Separator />
@@ -47,6 +68,7 @@ Toolbar.propTypes = {
     viewer: PropTypes.object,
     prevPage: PropTypes.func,
     nextPage: PropTypes.func,
+    scrollToPage: PropTypes.func,
     togglePanMode: PropTypes.func,
     scale: PropTypes.number,
 }
